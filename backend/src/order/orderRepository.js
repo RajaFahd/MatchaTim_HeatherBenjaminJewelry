@@ -64,6 +64,9 @@ class OrderRepository {
     const whereClause = statusFilter ? { status: statusFilter } : {};
     return prisma.order.findMany({
       where: whereClause,
+      include: {
+        items: true
+      },
       orderBy: { createdAt: 'desc' }
     });
   }
