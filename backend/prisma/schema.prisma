@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  name          String
+  role          String   @default("manager")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Product {
+  id             String      @id @default(uuid())
+  styleCode      String      @unique @map("style_code")
+  productName    String      @map("product_name")
+  description    String?
+  material       String?
+  imageUrl       String?     @map("image_url")
+  wholesalePrice Decimal     @default(0.00) @map("wholesale_price") @db.Decimal(12, 2)
+  orderItems     OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id            String       @id @default(uuid())
+  poNumber      String       @map("po_number")
+  customerName  String       @map("customer_name")
+  customerEmail String?      @map("customer_email")
+  uploadFile    String?      @map("upload_file")
+  notes         String?
+  status        String       @default("Uploaded")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  items         OrderItem[]
+  productions   Production[]
+  packings      Packing[]
+  trackings     Tracking[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String   @id @default(uuid())
+  orderId        String   @map("order_id")
+  productId      String?  @map("product_id")
+  quantity       Int
+  size           String?
+  material       String?
+  specialRequest String?  @map("special_request")
+  
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("order_items")
+}
+
+model Production {
+  id             String   @id @default(uuid())
+  orderId        String   @map("order_id")
+  productionNote String?  @map("production_note")
+  artisanNote    String?  @map("artisan_note")
+  generatedByAi  Boolean  @default(true) @map("generated_by_ai")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("production")
+}
+
+model Packing {
+  id             String   @id @default(uuid())
+  orderId        String   @map("order_id")
+  packingNote    String?  @map("packing_note")
+  checklist      Json     @default("[]")
+  generatedByAi  Boolean  @default(true) @map("generated_by_ai")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("packing")
+}
+
+model Tracking {
+  id        String   @id @default(uuid())
+  orderId   String   @map("order_id")
+  status    String
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("tracking")
+}
