@@ -26,7 +26,10 @@ export default function TrackingPage() {
 
   useEffect(() => {
     if (!id) return
-    fetch(`/api/orders/${id}`)
+    const token = localStorage.getItem('token')
+    fetch(`/api/orders/${id}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    })
       .then(res => {
         if (!res.ok) throw new Error('Order not found')
         return res.json()
@@ -43,17 +46,17 @@ export default function TrackingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex justify-center items-center py-32">
+        <div className="w-8 h-8 border-2 border-primary-gold border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
 
   if (error || !order) {
     return (
-      <main className="max-w-5xl mx-auto p-8 text-center">
-        <p className="text-xl font-bold text-red-500">Error: {error || 'Order not found'}</p>
-        <a href="/dashboard" className="text-blue-500 hover:underline mt-4 inline-block">Back to Dashboard</a>
+      <main className="text-center py-16">
+        <p className="text-xl font-bold text-error-red font-display">Error: {error || 'Order not found'}</p>
+        <a href="/dashboard" className="text-primary-gold hover:underline mt-6 inline-block font-semibold">Back to Dashboard</a>
       </main>
     )
   }
@@ -85,32 +88,34 @@ export default function TrackingPage() {
   const currentStep = steps.filter(s => s.done).length
 
   return (
-    <main className="max-w-2xl mx-auto p-8">
-      <a href={`/packing/${order.id}`} className="text-sm text-gray-400 hover:text-gray-600 mb-6 inline-block">← Back to Packing</a>
+    <main className="max-w-2xl mx-auto py-8">
+      <a href={`/packing/${order.id}`} className="text-xs font-bold uppercase tracking-wider text-txt-muted hover:text-primary-gold mb-6 inline-block transition">
+        ← Back to Packing
+      </a>
 
-      <h1 className="text-2xl font-bold mb-2">🚚 Order Tracking</h1>
-      <p className="text-gray-500 text-sm mb-8">{order.poNumber} — {order.customerName}</p>
+      <h1 className="text-3xl font-semibold mb-2 text-txt-main font-display">🚚 Order Tracking</h1>
+      <p className="text-txt-muted text-sm mb-10">{order.poNumber} — {order.customerName}</p>
 
-      <div className="relative">
+      <div className="relative pl-2">
         {steps.map((step, i) => (
-          <div key={i} className="flex gap-4 mb-6 relative">
+          <div key={i} className="flex gap-6 mb-8 relative">
             {i < steps.length - 1 && (
-              <div className={`absolute left-4 top-8 w-0.5 h-10 ${step.done ? 'bg-black' : 'bg-gray-200'}`} />
+              <div className={`absolute left-4 top-8 w-0.5 h-10 ${step.done ? 'bg-primary-gold' : 'bg-border-main'}`} />
             )}
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 z-10
-              ${step.done ? 'bg-black text-white' : i === currentStep ? 'bg-gray-200 text-gray-600 border-2 border-black' : 'bg-gray-100 text-gray-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 z-10 transition-colors duration-300
+              ${step.done ? 'bg-primary-gold text-white' : i === currentStep ? 'bg-bg-card text-primary-gold border-2 border-primary-gold' : 'bg-bg-card text-txt-muted border border-border-main'}`}>
               {step.done ? '✓' : i + 1}
             </div>
             <div className="pt-0.5">
-              <p className={`font-semibold ${step.done ? 'text-gray-900' : 'text-gray-400'}`}>{step.label}</p>
-              <p className="text-xs text-gray-400">{step.date}</p>
+              <p className={`font-semibold text-sm ${step.done ? 'text-txt-main' : 'text-txt-muted'}`}>{step.label}</p>
+              <p className="text-xs text-txt-muted mt-0.5">{step.date}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-8">
-        <a href="/dashboard" className="px-6 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition inline-block">
+      <div className="mt-10">
+        <a href="/dashboard" className="px-6 py-3.5 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-xs font-semibold tracking-wider uppercase transition duration-300 inline-block">
           Go to Dashboard
         </a>
       </div>

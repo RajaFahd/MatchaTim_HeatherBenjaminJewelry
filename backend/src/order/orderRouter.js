@@ -52,4 +52,32 @@ router.put('/:id/status', authMiddleware, async (req, res) => {
   }
 });
 
+router.put('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await orderService.updateOrder(id, req.body);
+    return res.status(200).json({
+      message: 'Order details and items updated successfully.',
+      order
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.put('/:id/packing', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { packingNote, checklist } = req.body;
+    const packing = await orderService.updatePacking(id, { packingNote, checklist });
+    return res.status(200).json({
+      message: 'Packing details and checklist updated successfully.',
+      packing
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 module.exports = router;
+

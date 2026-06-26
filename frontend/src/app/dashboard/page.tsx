@@ -19,7 +19,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/orders')
+    const token = localStorage.getItem('token');
+    fetch('/api/orders', {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    })
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch orders')
         return res.json()
@@ -37,15 +40,15 @@ export default function Dashboard() {
   }, [])
 
   const statusColor: Record<string, string> = {
-    'Pending': 'bg-yellow-100 text-yellow-700',
-    'Uploaded': 'bg-purple-100 text-purple-700',
-    'Reviewed': 'bg-indigo-100 text-indigo-700',
-    'Production': 'bg-blue-100 text-blue-700',
-    'In Production': 'bg-blue-100 text-blue-700',
-    'QC': 'bg-amber-100 text-amber-700',
-    'Packing': 'bg-orange-100 text-orange-700',
-    'Shipping': 'bg-teal-100 text-teal-700',
-    'Completed': 'bg-green-100 text-green-700',
+    'Pending': 'bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-400',
+    'Uploaded': 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400',
+    'Reviewed': 'bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400',
+    'Production': 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400',
+    'In Production': 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400',
+    'QC': 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400',
+    'Packing': 'bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400',
+    'Shipping': 'bg-teal-100 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400',
+    'Completed': 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400',
   }
 
   const formatItemsCount = (items: OrderItem[] | undefined) => {
@@ -67,61 +70,66 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="max-w-5xl mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
+    <main className="w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">📋 Order Dashboard</h1>
-          <p className="text-gray-500 text-sm mt-1">All incoming purchase orders</p>
+          <h1 className="text-3xl font-semibold text-txt-main font-display">📋 Order Dashboard</h1>
+          <p className="text-txt-muted text-sm mt-1">All incoming purchase orders and status tracking</p>
         </div>
-        <a href="/" className="px-5 py-2 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition">
+        <a 
+          href="/" 
+          className="px-5 py-2.5 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-xs font-semibold tracking-wide uppercase transition duration-300"
+        >
           + Upload New PO
         </a>
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex justify-center items-center py-24">
+          <div className="w-8 h-8 border-2 border-primary-gold border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : orders.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-16 text-center">
+        <div className="bg-bg-card rounded-card border border-border-main p-16 text-center">
           <p className="text-5xl mb-4">📭</p>
-          <p className="text-lg font-semibold text-gray-700">No purchase orders found</p>
-          <p className="text-sm text-gray-400 mt-1">Upload a PO file on the homepage to start processing.</p>
+          <p className="text-lg font-medium text-txt-main font-display">No purchase orders found</p>
+          <p className="text-sm text-txt-muted mt-2">Upload a PO file on the homepage to start processing.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr className="text-left text-sm text-gray-500">
-                <th className="px-6 py-4 font-medium">PO Number</th>
-                <th className="px-6 py-4 font-medium">Customer</th>
-                <th className="px-6 py-4 font-medium">Items</th>
-                <th className="px-6 py-4 font-medium">Date</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((o, i) => (
-                <tr key={o.id} className={`border-b border-gray-100 hover:bg-gray-50 transition ${i === orders.length - 1 ? 'border-0' : ''}`}>
-                  <td className="px-6 py-4 font-mono text-sm font-medium">{o.poNumber}</td>
-                  <td className="px-6 py-4 text-gray-800">{o.customerName}</td>
-                  <td className="px-6 py-4 text-gray-500 text-sm">{formatItemsCount(o.items)}</td>
-                  <td className="px-6 py-4 text-gray-500 text-sm">{formatDate(o.createdAt)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor[o.status] || 'bg-gray-100 text-gray-700'}`}>
-                      {o.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <a href={`/review/${o.id}`} className="text-blue-600 text-sm hover:underline font-medium">
-                      View →
-                    </a>
-                  </td>
+        <div className="bg-bg-card rounded-card border border-border-main overflow-hidden transition-all duration-300">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-bg-main border-b border-border-main text-txt-muted text-xs uppercase tracking-wider">
+                <tr className="text-left">
+                  <th className="px-6 py-4 font-semibold">PO Number</th>
+                  <th className="px-6 py-4 font-semibold">Customer</th>
+                  <th className="px-6 py-4 font-semibold">Items</th>
+                  <th className="px-6 py-4 font-semibold">Date</th>
+                  <th className="px-6 py-4 font-semibold">Status</th>
+                  <th className="px-6 py-4 font-semibold">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border-main">
+                {orders.map((o) => (
+                  <tr key={o.id} className="hover:bg-bg-main/40 transition-colors duration-200">
+                    <td className="px-6 py-4 font-mono text-xs font-semibold text-primary-gold">{o.poNumber}</td>
+                    <td className="px-6 py-4 text-txt-main font-medium">{o.customerName}</td>
+                    <td className="px-6 py-4 text-txt-muted">{formatItemsCount(o.items)}</td>
+                    <td className="px-6 py-4 text-txt-muted text-xs">{formatDate(o.createdAt)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${statusColor[o.status] || 'bg-bg-main text-txt-muted'}`}>
+                        {o.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <a href={`/review/${o.id}`} className="text-primary-gold hover:text-opacity-80 text-xs font-bold uppercase tracking-wider transition">
+                        View Details →
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </main>

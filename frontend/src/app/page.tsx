@@ -18,8 +18,10 @@ export default function UploadPage() {
       const formData = new FormData();
       formData.append("file", file);
 
+      const token = localStorage.getItem('token');
       const response = await fetch("/api/orders/upload", {
         method: "POST",
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
         body: formData,
       });
 
@@ -51,37 +53,43 @@ export default function UploadPage() {
   })
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 bg-gray-50">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-900">💎 Heather Benjamin Jewelry</h1>
-        <p className="text-gray-500 mt-2">AI Purchase Order Assistant</p>
+    <main className="flex-1 flex flex-col items-center justify-center py-12">
+      <div className="mb-10 text-center">
+        <h1 className="text-4xl font-semibold tracking-wide text-txt-main font-display">
+          💎 Heather Benjamin
+        </h1>
+        <p className="text-primary-gold text-xs uppercase tracking-widest font-semibold mt-2">
+          AI Purchase Order Assistant
+        </p>
       </div>
 
       <div
         {...getRootProps()}
-        className={`w-full max-w-lg border-2 border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all
-          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50'}`}
+        className={`w-full max-w-lg border border-dashed rounded-card p-16 text-center cursor-pointer transition-all duration-300 bg-bg-card
+          ${isDragActive ? 'border-primary-gold bg-accent-champagne/10' : 'border-border-main hover:border-primary-gold hover:bg-accent-champagne/5'}`}
       >
         <input {...getInputProps()} />
-        <p className="text-5xl mb-4">📄</p>
-        <p className="text-lg font-semibold text-gray-700">
-          {isDragActive ? 'Drop the file here...' : 'Drag & drop your PO file here'}
+        <p className="text-5xl mb-6">📄</p>
+        <p className="text-lg font-medium text-txt-main">
+          {isDragActive ? 'Drop the purchase order here...' : 'Drag & drop your PO file here'}
         </p>
-        <p className="text-sm text-gray-400 mt-2">PDF, Excel (.xlsx), or photo</p>
-        <button className="mt-6 px-8 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition">
+        <p className="text-xs text-txt-muted mt-2">PDF, Excel (.xlsx), or Image</p>
+        <button className="mt-8 px-8 py-3 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-sm font-semibold tracking-wide transition duration-300">
           Browse File
         </button>
       </div>
 
       {fileName && !loading && (
-        <p className="mt-4 text-sm text-gray-500">📎 {fileName}</p>
+        <p className="mt-6 text-sm text-txt-muted flex items-center gap-2">
+          <span>📎</span> {fileName}
+        </p>
       )}
 
       {loading && (
-        <div className="mt-8 text-center">
-          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-gray-600 font-medium">AI is reading your purchase order...</p>
-          <p className="text-gray-400 text-sm mt-1">Please wait a moment</p>
+        <div className="mt-10 text-center">
+          <div className="w-8 h-8 border-2 border-primary-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-txt-main font-medium text-sm">AI is analyzing your purchase order...</p>
+          <p className="text-txt-muted text-xs mt-1">Please wait a moment</p>
         </div>
       )}
     </main>
