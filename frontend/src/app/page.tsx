@@ -8,10 +8,36 @@ export default function UploadPage() {
   const [fileName, setFileName] = useState('')
   const router = useRouter()
 
-  const onDrop = useCallback((files: File[]) => {
-    setFileName(files[0].name)
-    setLoading(true)
-    setTimeout(() => router.push('/dashboard'), 2000)
+  const onDrop = useCallback(async (files: File[]) => {
+    if (files.length === 0) return;
+    const file = files[0];
+    setFileName(file.name);
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/orders/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to upload purchase order.");
+      }
+
+      const data = await response.json();
+      if (data?.order?.id) {
+        router.push(`/review/${data.order.id}`);
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      alert(err.message || "An error occurred during upload.");
+      setLoading(false);
+    }
   }, [router])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
