@@ -53,6 +53,9 @@ model OrderItem {
   id             String   @id @default(uuid())
   orderId        String   @map("order_id")
   productId      String?  @map("product_id")
+  styleCode      String?  @map("style_code")
+  productName    String?  @map("product_name")
+  unitPrice      Decimal? @default(0.00) @map("unit_price") @db.Decimal(12, 2)
   quantity       Int
   size           String?
   material       String?

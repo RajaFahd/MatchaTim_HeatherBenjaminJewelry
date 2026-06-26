@@ -13,6 +13,9 @@ class OrderRepository {
         const itemsWithOrderId = itemsData.map(item => ({
           orderId: order.id,
           productId: item.productId,
+          styleCode: item.styleCode,
+          productName: item.productName,
+          unitPrice: item.unitPrice,
           quantity: item.quantity,
           size: item.size,
           material: item.material,
@@ -120,15 +123,18 @@ class OrderRepository {
         for (const item of itemsData) {
           if (item.id) {
             await tx.orderItem.update({
-              where: { id: item.id },
-              data: {
-                productId: item.productId,
-                quantity: item.quantity,
-                size: item.size,
-                material: item.material,
-                specialRequest: item.specialRequest
-              }
-            });
+               where: { id: item.id },
+               data: {
+                 productId: item.productId,
+                 styleCode: item.styleCode,
+                 productName: item.productName,
+                 unitPrice: item.unitPrice,
+                 quantity: item.quantity,
+                 size: item.size,
+                 material: item.material,
+                 specialRequest: item.specialRequest
+               }
+             });
           }
         }
       }

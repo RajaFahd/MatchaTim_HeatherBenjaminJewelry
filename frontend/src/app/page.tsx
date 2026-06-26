@@ -65,7 +65,7 @@ export default function UploadPage() {
 
       <div
         {...getRootProps()}
-        className={`w-full max-w-lg border border-dashed rounded-card p-16 text-center cursor-pointer transition-all duration-300 bg-bg-card
+        className={`w-full max-w-lg border border-dashed rounded-card p-8 sm:p-16 text-center cursor-pointer transition-all duration-300 bg-bg-card
           ${isDragActive ? 'border-primary-gold bg-accent-champagne/10' : 'border-border-main hover:border-primary-gold hover:bg-accent-champagne/5'}`}
       >
         <input {...getInputProps()} />

@@ -1,7 +1,6 @@
 const { OpenAI } = require('openai');
-const { PDFParse } = require('pdf-parse');
+const parserService = require('./parserService');
 const { getSystemPrompt } = require('./systemPrompt');
-const xlsx = require('xlsx');
 require('dotenv').config();
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
@@ -29,53 +28,12 @@ if (geminiApiKey && !geminiApiKey.includes('placeholder')) {
 }
 
 /**
- * Parses a PDF file to text.
- */
-async function parsePdf(buffer) {
-  try {
-    const uint8Array = new Uint8Array(buffer);
-    const pdf = new PDFParse(uint8Array);
-    const data = await pdf.getText();
-    return data.text;
-  } catch (error) {
-    console.error('PDF parsing error:', error);
-    throw new Error('Failed to parse PDF file text.');
-  }
-}
-
-/**
- * Parses an Excel file to string representation of sheets.
- */
-function parseExcel(buffer) {
-  try {
-    const workbook = xlsx.read(buffer, { type: 'buffer' });
-    let resultText = '';
-    
-    workbook.SheetNames.forEach((sheetName) => {
-      const sheet = workbook.Sheets[sheetName];
-      const json = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-      resultText += `Sheet: ${sheetName}\n`;
-      json.forEach((row) => {
-        resultText += row.join('\t') + '\n';
-      });
-      resultText += '\n';
-    });
-    
-    return resultText;
-  } catch (error) {
-    console.error('Excel parsing error:', error);
-    throw new Error('Failed to parse Excel file content.');
-  }
-}
-
-/**
  * Fallback parser when OpenRouter API key is missing or fails.
  * Returns mock/simulated data based on catalog.
  */
 function getFallbackExtraction(fileName, catalogProducts) {
   console.log('Using fallback PO extraction');
   
-  // Pick some product from catalog if available, else use a default
   const catalogProduct = catalogProducts && catalogProducts.length > 0
     ? catalogProducts[0]
     : { style_code: 'HB102', product_name: 'Classic Gold Ring', material: 'Gold' };
@@ -125,13 +83,15 @@ exports.extractPurchaseOrder = async (fileBuffer, mimeType, originalName, catalo
 
   try {
     const model = isGeminiStudio ? 'gemini-2.5-flash' : 'google/gemini-2.5-flash';
+    const systemPrompt = getSystemPrompt(catalogProducts);
     const messages = [];
 
-    const systemPrompt = getSystemPrompt(catalogProducts);
+    // 1. Run file parsing via parserService
+    const parsedResult = await parserService.parseFile(fileBuffer, mimeType);
 
-    if (mimeType.startsWith('image/')) {
-      // Image: Send base64 image block using OpenAI SDK format for OpenRouter
-      const base64Image = fileBuffer.toString('base64');
+    // 2. Prepare message body based on parser output type
+    if (parsedResult && parsedResult.isImage) {
+      // Vision Model Call
       messages.push({
         role: 'user',
         content: [
@@ -142,39 +102,130 @@ exports.extractPurchaseOrder = async (fileBuffer, mimeType, originalName, catalo
           {
             type: 'image_url',
             image_url: {
-              url: `data:${mimeType};base64,${base64Image}`
+              url: `data:${parsedResult.mimeType};base64,${parsedResult.base64Data}`
             }
           }
         ]
       });
     } else {
-      let docText = '';
-      if (mimeType === 'application/pdf') {
-        docText = await parsePdf(fileBuffer);
-      } else if (
-        mimeType === 'application/vnd.ms-excel' ||
-        mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      ) {
-        docText = parseExcel(fileBuffer);
-      } else {
-        throw new Error('Unsupported file format for extraction.');
-      }
-
+      // Text Model Call (PDF, Excel, Plain Text)
       messages.push({
         role: 'user',
-        content: `${systemPrompt}\n\nPlease extract the purchase order data from the following parsed document content:\n\n${docText}`
+        content: `${systemPrompt}\n\nPlease extract the purchase order data from the following parsed document content:\n\n${parsedResult}`
       });
     }
 
+    // 3. Request completion using JSON Schema (Structured Output)
     const response = await openai.chat.completions.create({
       model: model,
       messages: messages,
-      response_format: { type: 'json_object' }
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'po_extraction',
+          schema: {
+            type: 'object',
+            properties: {
+              po_number: { type: 'string' },
+              order_date: { type: 'string' },
+              ship_date: { type: 'string' },
+              payment_terms: { type: 'string' },
+              customer: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  contact_person: { type: 'string' },
+                  email: { type: 'string' },
+                  phone: { type: 'string' },
+                  bill_to_address: { type: 'string' },
+                  ship_to_address: { type: 'string' }
+                }
+              },
+              products: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    style_code: { type: 'string' },
+                    product_name: { type: 'string' },
+                    material: { type: 'string' },
+                    finish: { type: 'string' },
+                    size: { type: 'string' },
+                    unit_price: { type: 'number' },
+                    quantity: { type: 'integer' },
+                    subtotal: { type: 'number' },
+                    special_notes: { type: 'string' }
+                  }
+                }
+              },
+              order_summary: {
+                type: 'object',
+                properties: {
+                  total_skus: { type: 'integer' },
+                  total_units: { type: 'integer' },
+                  order_total: { type: 'number' },
+                  currency: { type: 'string' },
+                  shipping_method: { type: 'string' }
+                }
+              },
+              special_instructions: {
+                type: 'array',
+                items: { type: 'string' }
+              },
+              production_notes: {
+                type: 'object',
+                properties: {
+                  urgent_items: { type: 'array', items: { type: 'string' } },
+                  gift_items: { type: 'array', items: { type: 'string' } },
+                  fragile_items: { type: 'array', items: { type: 'string' } },
+                  custom_requests: { type: 'array', items: { type: 'string' } }
+                }
+              },
+              packing_guide: {
+                type: 'object',
+                properties: {
+                  items: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        style_code: { type: 'string' },
+                        product_name: { type: 'string' },
+                        quantity: { type: 'integer' },
+                        packaging_type: { type: 'string' },
+                        special_handling: { type: 'string' }
+                      }
+                    }
+                  },
+                  carton_label: { type: 'string' },
+                  shipping_method: { type: 'string' },
+                  tracking_required: { type: 'boolean' }
+                }
+              },
+              missing_info: {
+                type: 'array',
+                items: { type: 'string' }
+              },
+              flags: {
+                type: 'array',
+                items: { type: 'string' }
+              },
+              validation: {
+                type: 'object',
+                properties: {
+                  subtotals_match: { type: 'boolean' },
+                  total_correct: { type: 'boolean' },
+                  all_style_codes_present: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        }
+      }
     });
 
     const responseText = response.choices[0].message.content.trim();
     
-    // Attempt to extract JSON from the text in case LLM wraps it in markdown code block
     let jsonString = responseText;
     const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || responseText.match(/```\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
@@ -185,8 +236,7 @@ exports.extractPurchaseOrder = async (fileBuffer, mimeType, originalName, catalo
     return extractedData;
 
   } catch (error) {
-    console.error('OpenRouter extraction error:', error);
-    // If the real API calls fail, fallback to mock data to prevent blocking development
+    console.error('AI extraction error in aiService:', error);
     return getFallbackExtraction(originalName, catalogProducts);
   }
 };
