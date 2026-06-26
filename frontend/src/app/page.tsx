@@ -39,11 +39,11 @@ export default function UploadPage() {
         <input {...getInputProps()} />
         <p className="text-5xl mb-4">📄</p>
         <p className="text-lg font-semibold text-gray-700">
-          {isDragActive ? 'Lepas file di sini...' : 'Drag & drop file PO di sini'}
+          {isDragActive ? 'Drop the file here...' : 'Drag & drop your PO file here'}
         </p>
-        <p className="text-sm text-gray-400 mt-2">PDF, Excel (.xlsx), atau foto</p>
+        <p className="text-sm text-gray-400 mt-2">PDF, Excel (.xlsx), or photo</p>
         <button className="mt-6 px-8 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition">
-          Pilih File
+          Browse File
         </button>
       </div>
 
@@ -54,8 +54,8 @@ export default function UploadPage() {
       {loading && (
         <div className="mt-8 text-center">
           <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-gray-600 font-medium">AI sedang membaca pesanan...</p>
-          <p className="text-gray-400 text-sm mt-1">Mohon tunggu sebentar</p>
+          <p className="text-gray-600 font-medium">AI is reading your purchase order...</p>
+          <p className="text-gray-400 text-sm mt-1">Please wait a moment</p>
         </div>
       )}
     </main>
