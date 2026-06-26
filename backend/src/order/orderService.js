@@ -107,6 +107,49 @@ class OrderService {
 
     return orderRepository.updateStatus(id, status);
   }
+
+  async updateOrder(id, data) {
+    const products = await productRepository.findAll();
+
+    const orderData = {
+      poNumber: data.poNumber,
+      customerName: data.customerName,
+      customerEmail: data.customerEmail,
+      notes: data.notes
+    };
+
+    let itemsData = [];
+    if (data.items && data.items.length > 0) {
+      itemsData = data.items.map(item => {
+        let productId = item.productId || null;
+
+        if (item.styleCode) {
+          const matchedProduct = products?.find(
+            p => p.styleCode.toLowerCase().replace(/[\s-_]/g, '') === item.styleCode.toLowerCase().replace(/[\s-_]/g, '')
+          );
+          if (matchedProduct) {
+            productId = matchedProduct.id;
+          }
+        }
+
+        return {
+          id: item.id,
+          productId,
+          quantity: item.quantity ? parseInt(item.quantity) : 1,
+          size: item.size ? String(item.size) : null,
+          material: item.material || null,
+          specialRequest: item.specialRequest || null
+        };
+      });
+    }
+
+    return orderRepository.updateOrderWithDetails(id, { orderData, itemsData });
+  }
+
+  async updatePacking(orderId, { packingNote, checklist }) {
+    return orderRepository.updatePacking(orderId, { packingNote, checklist });
+  }
 }
 
 module.exports = new OrderService();
+

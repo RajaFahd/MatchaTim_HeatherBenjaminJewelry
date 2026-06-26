@@ -6,6 +6,7 @@ interface Product {
   styleCode: string
   productName: string
   material?: string
+  imageUrl?: string
 }
 
 interface OrderItem {
@@ -44,7 +45,10 @@ export default function ProductionPage() {
 
   useEffect(() => {
     if (!id) return
-    fetch(`/api/orders/${id}`)
+    const token = localStorage.getItem('token')
+    fetch(`/api/orders/${id}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    })
       .then(res => {
         if (!res.ok) throw new Error('Order not found')
         return res.json()
@@ -62,10 +66,12 @@ export default function ProductionPage() {
   const handleProceedToPacking = async () => {
     if (!order) return
     try {
+      const token = localStorage.getItem('token')
       const response = await fetch(`/api/orders/${order.id}/status`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({ status: 'Packing' })
       })
@@ -82,17 +88,17 @@ export default function ProductionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex justify-center items-center py-32">
+        <div className="w-8 h-8 border-2 border-primary-gold border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
 
   if (error || !order) {
     return (
-      <main className="max-w-5xl mx-auto p-8 text-center">
-        <p className="text-xl font-bold text-red-500">Error: {error || 'Order not found'}</p>
-        <a href="/dashboard" className="text-blue-500 hover:underline mt-4 inline-block">Back to Dashboard</a>
+      <main className="text-center py-16">
+        <p className="text-xl font-bold text-error-red font-display">Error: {error || 'Order not found'}</p>
+        <a href="/dashboard" className="text-primary-gold hover:underline mt-6 inline-block font-semibold">Back to Dashboard</a>
       </main>
     )
   }
@@ -100,31 +106,43 @@ export default function ProductionPage() {
   const productionRecord = order.productions?.[0]
 
   return (
-    <main className="max-w-5xl mx-auto p-8">
-      <a href={`/review/${order.id}`} className="text-sm text-gray-400 hover:text-gray-600 mb-6 inline-block">← Back to Review</a>
+    <main className="w-full">
+      <a href={`/review/${order.id}`} className="text-xs font-bold uppercase tracking-wider text-txt-muted hover:text-primary-gold mb-6 inline-block transition">
+        ← Back to Review
+      </a>
 
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold">🔨 Production Instructions</h1>
-          <p className="text-gray-500 text-sm mt-1">{order.poNumber} — {order.customerName}</p>
+          <h1 className="text-3xl font-semibold text-txt-main font-display">🔨 Production Instructions</h1>
+          <p className="text-txt-muted text-sm mt-1">{order.poNumber} — {order.customerName}</p>
         </div>
         <button 
           onClick={handleProceedToPacking}
-          className="px-5 py-2 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition cursor-pointer"
+          className="px-5 py-2.5 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-xs font-semibold tracking-wide uppercase transition duration-300 cursor-pointer"
         >
           Packing Guide →
         </button>
       </div>
 
       {productionRecord && (productionRecord.productionNote || productionRecord.artisanNote) && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-8 text-sm text-gray-800">
-          <h3 className="font-semibold text-yellow-900 mb-2">🤖 AI Production Notes</h3>
-          {productionRecord.productionNote && <p className="mb-2"><strong>General:</strong> {productionRecord.productionNote}</p>}
-          {productionRecord.artisanNote && <p><strong>Artisan:</strong> {productionRecord.artisanNote}</p>}
+        <div className="bg-accent-champagne/10 border border-primary-gold/30 rounded-card p-6 mb-8 text-sm text-txt-main transition-colors duration-300">
+          <h3 className="font-semibold text-primary-gold font-display text-base mb-3">🤖 AI Production Notes</h3>
+          {productionRecord.productionNote && (
+            <p className="mb-3 leading-relaxed">
+              <strong className="text-primary-gold uppercase tracking-wider text-xs block mb-0.5">General Instructions:</strong> 
+              {productionRecord.productionNote}
+            </p>
+          )}
+          {productionRecord.artisanNote && (
+            <p className="leading-relaxed">
+              <strong className="text-primary-gold uppercase tracking-wider text-xs block mb-0.5">Balinese Artisan Craftsmanship:</strong> 
+              {productionRecord.artisanNote}
+            </p>
+          )}
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {order.items.map((item) => {
           const code = item.product ? item.product.styleCode : 'UNKNOWN'
           const name = item.product ? item.product.productName : 'Unknown Product'
@@ -133,18 +151,40 @@ export default function ProductionPage() {
           const warning = !item.productId || item.size === 'NEEDS CONFIRMATION' || item.size === 'UNKNOWN'
 
           return (
-            <div key={item.id} className={`bg-white border rounded-2xl overflow-hidden ${warning ? 'border-red-200' : 'border-gray-200'}`}>
-              <div className={`px-6 py-4 flex justify-between items-center ${warning ? 'bg-red-50' : 'bg-gray-50'}`}>
+            <div key={item.id} className={`bg-bg-card border rounded-card overflow-hidden transition-all duration-300
+              ${warning ? 'border-error-red/30' : 'border-border-main'}`}>
+              <div className={`px-6 py-4 flex justify-between items-center border-b border-border-main/50
+                ${warning ? 'bg-error-red/5' : 'bg-bg-main/20'}`}>
                 <div className="flex items-center gap-4">
-                  <span className="font-mono font-bold text-sm bg-white border border-gray-200 px-3 py-1 rounded-lg">{code}</span>
-                  <p className="font-semibold text-gray-900">{name}</p>
+                  <span className="font-mono font-bold text-xs bg-bg-main border border-border-main px-3 py-1 rounded-lg text-primary-gold">{code}</span>
+                  <p className="font-semibold text-txt-main font-display">{name}</p>
                 </div>
-                <span className="text-2xl font-bold text-gray-700">{item.quantity} <span className="text-sm font-normal text-gray-400">pcs</span></span>
+                <span className="text-xl font-bold text-txt-main">
+                  {item.quantity} <span className="text-xs font-normal text-txt-muted">pcs</span>
+                </span>
               </div>
-              <div className="px-6 py-4">
-                <p className="text-sm"><span className="text-gray-400">Material:</span> {material}</p>
-                {item.size && <p className="text-sm mt-1"><span className="text-gray-400">Size:</span> {item.size}</p>}
-                <p className="text-sm mt-2"><span className="text-gray-400">Notes:</span> {notes}</p>
+              <div className="px-6 py-4 flex flex-col md:flex-row gap-6">
+                {/* Product Image */}
+                <div className="w-24 h-24 flex-shrink-0">
+                  {item.product?.imageUrl ? (
+                    <img 
+                      src={item.product.imageUrl} 
+                      alt={name} 
+                      className="w-full h-full object-cover rounded-image border border-border-main"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-bg-main border border-border-main rounded-image flex items-center justify-center text-txt-muted text-xs text-center p-2">
+                      No Image
+                    </div>
+                  )}
+                </div>
+
+                {/* Details */}
+                <div className="flex-1 text-sm space-y-2">
+                  <p><span className="text-txt-muted text-xs uppercase tracking-wider mr-2">Material:</span> <span className="font-medium text-txt-main">{material}</span></p>
+                  {item.size && <p><span className="text-txt-muted text-xs uppercase tracking-wider mr-2">Size:</span> <span className="font-medium text-txt-main">{item.size}</span></p>}
+                  <p className="pt-2 border-t border-border-main/40"><span className="text-txt-muted text-xs uppercase tracking-wider block mb-1">Notes / Requests:</span> <span className="text-txt-main italic">{notes}</span></p>
+                </div>
               </div>
             </div>
           )

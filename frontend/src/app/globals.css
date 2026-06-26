@@ -1,26 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FFFFFF;
+  --card-background: #FAF8F4;
+  --text-main: #1E1E1E;
+  --text-muted: #7A7A7A;
+  --border-color: #E5E5E5;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --background: #121212;
+  --card-background: #1E1E1E;
+  --text-main: #FAF8F4;
+  --text-muted: #A0A0A0;
+  --border-color: #2D2D2D;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --color-bg-main: var(--background);
+  --color-bg-card: var(--card-background);
+  --color-txt-main: var(--text-main);
+  --color-txt-muted: var(--text-muted);
+  --color-border-main: var(--border-color);
+
+  --color-primary-gold: #C6A55A;
+  --color-accent-champagne: #E8D9B5;
+  --color-success-green: #2E7D32;
+  --color-error-red: #D32F2F;
+
+  --font-display: Playfair Display, Georgia, serif;
+  --font-sans: Inter, sans-serif;
+  --font-mono: JetBrains Mono, monospace;
+
+  --radius-btn: 12px;
+  --radius-card: 18px;
+  --radius-input: 12px;
+  --radius-image: 20px;
+  --radius-modal: 24px;
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text-main);
+  font-family: Inter, sans-serif;
+  transition-property: color, background-color, border-color;
+  transition-duration: 300ms;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Playfair Display, Georgia, serif;
 }

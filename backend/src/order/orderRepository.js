@@ -106,6 +106,61 @@ class OrderRepository {
       return order;
     });
   }
+
+  async updateOrderWithDetails(id, { orderData, itemsData }) {
+    return prisma.$transaction(async (tx) => {
+      // 1. Update order
+      const order = await tx.order.update({
+        where: { id },
+        data: orderData
+      });
+
+      // 2. Update order items
+      if (itemsData && itemsData.length > 0) {
+        for (const item of itemsData) {
+          if (item.id) {
+            await tx.orderItem.update({
+              where: { id: item.id },
+              data: {
+                productId: item.productId,
+                quantity: item.quantity,
+                size: item.size,
+                material: item.material,
+                specialRequest: item.specialRequest
+              }
+            });
+          }
+        }
+      }
+
+      return order;
+    });
+  }
+
+  async updatePacking(orderId, { packingNote, checklist }) {
+    const packingRecord = await prisma.packing.findFirst({
+      where: { orderId }
+    });
+
+    if (packingRecord) {
+      return prisma.packing.update({
+        where: { id: packingRecord.id },
+        data: {
+          packingNote,
+          checklist
+        }
+      });
+    } else {
+      return prisma.packing.create({
+        data: {
+          orderId,
+          packingNote,
+          checklist
+        }
+      });
+    }
+  }
 }
 
 module.exports = new OrderRepository();
+
