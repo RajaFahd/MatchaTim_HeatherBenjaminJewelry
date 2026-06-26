@@ -78,10 +78,13 @@ export default function TrackingPage() {
   }
 
   const steps = [
-    { label: 'Order Received', ...getStatusInfo(['Uploaded']) },
-    { label: 'In Production', ...getStatusInfo(['Production']) },
-    { label: 'QC Passed', ...getStatusInfo(['QC', 'Packing', 'Shipping', 'Completed']) },
-    { label: 'Packed', ...getStatusInfo(['Packing', 'Shipping', 'Completed']) },
+    { label: 'Order Received', ...getStatusInfo(['Uploaded', 'Reviewed', 'Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'Invoice Issued', ...getStatusInfo(['Reviewed', 'Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'Deposit Tracked', ...getStatusInfo(['Reviewed', 'Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'Material Preparation', ...getStatusInfo(['Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'In Production', ...getStatusInfo(['Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'Quality Control (QC)', ...getStatusInfo(['QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'Packed & Ready', ...getStatusInfo(['Packing', 'Shipping', 'Completed']) },
     { label: 'Shipped', ...getStatusInfo(['Shipping', 'Completed']) },
   ]
 

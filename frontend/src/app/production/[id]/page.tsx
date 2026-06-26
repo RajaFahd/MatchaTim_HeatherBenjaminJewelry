@@ -153,13 +153,13 @@ export default function ProductionPage() {
           return (
             <div key={item.id} className={`bg-bg-card border rounded-card overflow-hidden transition-all duration-300
               ${warning ? 'border-error-red/30' : 'border-border-main'}`}>
-              <div className={`px-6 py-4 flex justify-between items-center border-b border-border-main/50
+              <div className={`px-6 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-b border-border-main/50
                 ${warning ? 'bg-error-red/5' : 'bg-bg-main/20'}`}>
-                <div className="flex items-center gap-4">
-                  <span className="font-mono font-bold text-xs bg-bg-main border border-border-main px-3 py-1 rounded-lg text-primary-gold">{code}</span>
-                  <p className="font-semibold text-txt-main font-display">{name}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                  <span className="w-fit font-mono font-bold text-xs bg-bg-main border border-border-main px-3 py-1 rounded-lg text-primary-gold">{code}</span>
+                  <p className="font-semibold text-txt-main font-display text-sm sm:text-base">{name}</p>
                 </div>
-                <span className="text-xl font-bold text-txt-main">
+                <span className="text-lg sm:text-xl font-bold text-txt-main">
                   {item.quantity} <span className="text-xs font-normal text-txt-muted">pcs</span>
                 </span>
               </div>

@@ -44,11 +44,13 @@ export default function PackingPage() {
 
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
     invoiced: false,
+    deposit: false,
     materials: false,
     production: false,
     qc: false,
     packed: false,
     shipped: false,
+    updated: false,
   })
 
   const [itemsChecklist, setItemsChecklist] = useState<Record<string, boolean>>({})
@@ -68,11 +70,13 @@ export default function PackingPage() {
         const packingRecord = data.packings?.[0]
         let savedStatus = {
           invoiced: false,
+          deposit: false,
           materials: false,
           production: false,
           qc: false,
           packed: false,
           shipped: false,
+          updated: false,
         }
         let savedItems: Record<string, boolean> = {}
 
@@ -104,12 +108,14 @@ export default function PackingPage() {
   }
 
   const steps = [
-    { key: 'invoiced', label: 'Invoiced' },
-    { key: 'materials', label: 'Materials Ready' },
-    { key: 'production', label: 'In Production' },
-    { key: 'qc', label: 'QC Passed' },
-    { key: 'packed', label: 'Packed' },
-    { key: 'shipped', label: 'Shipped' },
+    { key: 'invoiced', label: 'Invoice Issued' },
+    { key: 'deposit', label: 'Deposit Tracked' },
+    { key: 'materials', label: 'Material Preparation' },
+    { key: 'production', label: 'Production Progress' },
+    { key: 'qc', label: 'Quality Control (QC)' },
+    { key: 'packed', label: 'Packing Completed' },
+    { key: 'shipped', label: 'Shipping Dispatched' },
+    { key: 'updated', label: 'Customer Updated' },
   ]
 
   const handleProceedToTracking = async () => {
@@ -139,10 +145,16 @@ export default function PackingPage() {
 
       // 2. Determine and update order status
       let status = 'Packing'
-      if (checklist.shipped) {
+      if (checklist.updated) {
+        status = 'Completed'
+      } else if (checklist.shipped) {
         status = 'Shipping'
       } else if (checklist.packed) {
+        status = 'Packing'
+      } else if (checklist.qc) {
         status = 'QC'
+      } else if (checklist.production) {
+        status = 'Production'
       }
 
       const response = await fetch(`/api/orders/${order.id}/status`, {

@@ -13,6 +13,9 @@ interface Product {
 interface OrderItem {
   id: string
   productId?: string
+  styleCode?: string
+  productName?: string
+  unitPrice?: number
   quantity: number
   size?: string
   material?: string
@@ -64,7 +67,9 @@ export default function ReviewPage() {
         setCustomerEmail(data.customerEmail || '')
         setEditItems(data.items.map((item: OrderItem) => ({
           id: item.id,
-          styleCode: item.product ? item.product.styleCode : 'UNKNOWN',
+          styleCode: item.styleCode || (item.product ? item.product.styleCode : 'UNKNOWN'),
+          productName: item.productName || (item.product ? item.product.productName : 'UNKNOWN'),
+          unitPrice: item.unitPrice !== undefined ? item.unitPrice : (item.product ? Number(item.product.wholesalePrice) : 0),
           quantity: item.quantity,
           size: item.size || '',
           material: item.material || '',
@@ -249,7 +254,7 @@ export default function ReviewPage() {
                 <th className="px-6 py-3 font-semibold">Qty</th>
                 <th className="px-6 py-3 font-semibold">Size</th>
                 <th className="px-6 py-3 font-semibold">Material</th>
-                {!isEditing && <th className="px-6 py-3 font-semibold">Price</th>}
+                <th className="px-6 py-3 font-semibold">Price</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-main">
@@ -278,13 +283,22 @@ export default function ReviewPage() {
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input
-                        type="text"
-                        value={item.specialRequest}
-                        onChange={e => handleItemChange(index, 'specialRequest', e.target.value)}
-                        className="w-full min-w-[200px] h-9 border border-border-main rounded-btn bg-bg-main px-2 text-xs text-txt-main focus:border-primary-gold focus:outline-none transition"
-                        placeholder="Description or engraving request"
-                      />
+                      <div className="flex flex-col gap-1.5 w-full min-w-[220px]">
+                        <input
+                          type="text"
+                          value={item.productName}
+                          onChange={e => handleItemChange(index, 'productName', e.target.value)}
+                          className="w-full h-8 border border-border-main rounded-btn bg-bg-main px-2 text-xs text-txt-main focus:border-primary-gold focus:outline-none transition font-semibold"
+                          placeholder="Product Name"
+                        />
+                        <input
+                          type="text"
+                          value={item.specialRequest}
+                          onChange={e => handleItemChange(index, 'specialRequest', e.target.value)}
+                          className="w-full h-8 border border-border-main rounded-btn bg-bg-main px-2 text-[11px] text-txt-muted focus:border-primary-gold focus:outline-none transition italic"
+                          placeholder="Special Request / Description"
+                        />
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <input
@@ -312,13 +326,24 @@ export default function ReviewPage() {
                         placeholder="e.g. Gold"
                       />
                     </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={item.unitPrice}
+                        onChange={e => handleItemChange(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                        className="w-20 h-9 border border-border-main rounded-btn bg-bg-main px-2 text-xs text-txt-main focus:border-primary-gold focus:outline-none transition"
+                      />
+                    </td>
                   </tr>
                 ))
               ) : (
                 order.items.map((item) => {
-                  const code = item.product ? item.product.styleCode : 'UNKNOWN';
-                  const name = item.product ? item.product.productName : (item.specialRequest || 'No description');
-                  const price = item.product ? `$${Number(item.product.wholesalePrice).toFixed(2)}` : '—';
+                  const code = item.styleCode || (item.product ? item.product.styleCode : 'UNKNOWN');
+                  const name = item.productName || (item.product ? item.product.productName : (item.specialRequest || 'No description'));
+                  const price = item.unitPrice !== null && item.unitPrice !== undefined && Number(item.unitPrice) > 0
+                    ? `$${Number(item.unitPrice).toFixed(2)}`
+                    : (item.product ? `$${Number(item.product.wholesalePrice).toFixed(2)}` : '—');
                   const isOk = item.size && item.size !== 'NEEDS CONFIRMATION' && item.size !== 'UNKNOWN';
 
                   return (
@@ -359,18 +384,18 @@ export default function ReviewPage() {
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         {isEditing ? (
           <button 
             onClick={handleSaveChanges}
-            className="px-6 py-3.5 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-xs font-semibold tracking-wider uppercase transition duration-300 cursor-pointer"
+            className="w-full sm:w-auto px-6 py-3.5 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-xs font-semibold tracking-wider uppercase transition duration-300 cursor-pointer text-center"
           >
             Save Changes
           </button>
         ) : (
           <button 
             onClick={handleCreateInstructions}
-            className="px-6 py-3.5 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-xs font-semibold tracking-wider uppercase transition duration-300 cursor-pointer"
+            className="w-full sm:w-auto px-6 py-3.5 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-xs font-semibold tracking-wider uppercase transition duration-300 cursor-pointer text-center"
           >
             Create Production Instructions →
           </button>
