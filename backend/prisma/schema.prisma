@@ -34,7 +34,7 @@ model Product {
 
 model Order {
   id            String       @id @default(uuid())
-  poNumber      String       @map("po_number")
+  poNumber      String       @unique @map("po_number")
   customerName  String       @map("customer_name")
   customerEmail String?      @map("customer_email")
   uploadFile    String?      @map("upload_file")
@@ -44,6 +44,8 @@ model Order {
   items         OrderItem[]
   productions   Production[]
   packings      Packing[]
+  isDeleted     Boolean      @default(false) @map("is_deleted")
+  isArchived    Boolean      @default(false) @map("is_archived")
   trackings     Tracking[]
 
   @@map("orders")

@@ -111,7 +111,7 @@ class OrderService {
     };
 
     // 8. Save all details inside database using single transaction
-    const order = await orderRepository.createOrderWithDetails({
+    const order = await orderRepository.upsertOrderWithDetails({
       orderData,
       itemsData,
       productionData,
@@ -124,8 +124,8 @@ class OrderService {
     };
   }
 
-  async getAllOrders(status) {
-    return orderRepository.findAll(status);
+  async getAllOrders(filters) {
+    return orderRepository.findAll(filters);
   }
 
   async getOrderDetails(id) {
@@ -189,6 +189,22 @@ class OrderService {
 
   async updatePacking(orderId, { packingNote, checklist }) {
     return orderRepository.updatePacking(orderId, { packingNote, checklist });
+  }
+
+  async updateProduction(orderId, { productionNote, artisanNote }) {
+    return orderRepository.updateProduction(orderId, { productionNote, artisanNote });
+  }
+
+  async softDeleteOrder(id) {
+    return orderRepository.softDeleteOrder(id);
+  }
+
+  async archiveOrder(id) {
+    return orderRepository.archiveOrder(id);
+  }
+
+  async restoreOrder(id) {
+    return orderRepository.restoreOrder(id);
   }
 }
 

@@ -11,6 +11,8 @@ interface Product {
 interface OrderItem {
   id: string
   productId?: string
+  styleCode?: string
+  productName?: string
   quantity: number
   size?: string
   material?: string
@@ -246,8 +248,8 @@ export default function PackingPage() {
             </thead>
             <tbody className="divide-y divide-border-main">
               {order.items.map(item => {
-                const code = item.product ? item.product.styleCode : 'UNKNOWN'
-                const name = item.product ? item.product.productName : 'Unknown Product'
+                const code = item.styleCode || (item.product ? item.product.styleCode : 'UNKNOWN')
+                const name = item.productName || (item.product ? item.product.productName : 'Unknown Product')
                 const sizeText = item.size ? ` (Size: ${item.size})` : ''
                 const packaging = item.material ? `${item.material} box, 1 per box${sizeText}` : `Standard jewelry pouch${sizeText}`
                 
