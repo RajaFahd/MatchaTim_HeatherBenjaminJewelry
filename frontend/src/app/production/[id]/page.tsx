@@ -12,6 +12,8 @@ interface Product {
 interface OrderItem {
   id: string
   productId?: string
+  styleCode?: string
+  productName?: string
   quantity: number
   size?: string
   material?: string
@@ -43,6 +45,11 @@ export default function ProductionPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const [productionNote, setProductionNote] = useState('')
+  const [artisanNote, setArtisanNote] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+
   useEffect(() => {
     if (!id) return
     const token = localStorage.getItem('token')
@@ -55,6 +62,9 @@ export default function ProductionPage() {
       })
       .then(data => {
         setOrder(data)
+        const prod = data.productions?.[0]
+        setProductionNote(prod?.productionNote || '')
+        setArtisanNote(prod?.artisanNote || '')
         setLoading(false)
       })
       .catch(err => {
@@ -62,6 +72,56 @@ export default function ProductionPage() {
         setLoading(false)
       })
   }, [id])
+
+  const handleSaveChanges = async () => {
+    if (!order) return
+    setSaving(true)
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/orders/${order.id}/production`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ productionNote, artisanNote })
+      })
+
+      if (!response.ok) {
+        const errData = await response.json()
+        throw new Error(errData.error || 'Failed to save changes')
+      }
+
+      const updatedData = await response.json()
+      setOrder(prev => {
+        if (!prev) return null;
+        const productions = [...(prev.productions || [])];
+        if (productions.length > 0) {
+          productions[0] = {
+            ...productions[0],
+            productionNote,
+            artisanNote
+          };
+        } else {
+          productions.push({
+            id: updatedData.production?.id || '',
+            productionNote,
+            artisanNote
+          });
+        }
+        return {
+          ...prev,
+          productions
+        };
+      });
+
+      setIsEditing(false)
+    } catch (err: any) {
+      alert(err.message || 'Failed to save production instructions')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const handleProceedToPacking = async () => {
     if (!order) return
@@ -124,28 +184,86 @@ export default function ProductionPage() {
         </button>
       </div>
 
-      {productionRecord && (productionRecord.productionNote || productionRecord.artisanNote) && (
+      {isEditing ? (
+        <div className="bg-bg-card border border-border-main rounded-card p-6 mb-8 text-sm text-txt-main">
+          <h3 className="font-semibold text-primary-gold font-display text-base mb-4 font-semibold">📝 Edit Production Instructions</h3>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-txt-muted uppercase tracking-wider">General Instructions</label>
+              <textarea
+                value={productionNote}
+                onChange={(e) => setProductionNote(e.target.value)}
+                rows={4}
+                className="w-full p-3 bg-bg-main border border-border-main rounded-btn text-sm text-txt-main focus:outline-none focus:border-primary-gold transition"
+                placeholder="Enter general production instructions..."
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-txt-muted uppercase tracking-wider">Balinese Artisan Craftsmanship Notes</label>
+              <textarea
+                value={artisanNote}
+                onChange={(e) => setArtisanNote(e.target.value)}
+                rows={4}
+                className="w-full p-3 bg-bg-main border border-border-main rounded-btn text-sm text-txt-main focus:outline-none focus:border-primary-gold transition"
+                placeholder="Enter Balinese artisan notes..."
+              />
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={handleSaveChanges}
+                disabled={saving}
+                className="px-4 py-2 bg-primary-gold hover:bg-opacity-95 text-white text-xs font-semibold uppercase tracking-wider rounded-btn transition disabled:opacity-50 cursor-pointer font-semibold"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+              <button
+                onClick={() => {
+                  const prod = order.productions?.[0]
+                  setProductionNote(prod?.productionNote || '')
+                  setArtisanNote(prod?.artisanNote || '')
+                  setIsEditing(false)
+                }}
+                className="px-4 py-2 bg-bg-main hover:bg-bg-main/60 border border-border-main text-txt-main text-xs font-semibold uppercase tracking-wider rounded-btn transition cursor-pointer font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
         <div className="bg-accent-champagne/10 border border-primary-gold/30 rounded-card p-6 mb-8 text-sm text-txt-main transition-colors duration-300">
-          <h3 className="font-semibold text-primary-gold font-display text-base mb-3">🤖 AI Production Notes</h3>
-          {productionRecord.productionNote && (
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-semibold text-primary-gold font-display text-base">🤖 AI Production Notes</h3>
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-3 py-1.5 border border-primary-gold/50 text-primary-gold hover:bg-primary-gold hover:text-white rounded-btn text-xs font-semibold uppercase tracking-wider transition cursor-pointer font-semibold"
+            >
+              Edit Instructions
+            </button>
+          </div>
+          {productionNote ? (
             <p className="mb-3 leading-relaxed">
               <strong className="text-primary-gold uppercase tracking-wider text-xs block mb-0.5">General Instructions:</strong> 
-              {productionRecord.productionNote}
+              {productionNote}
             </p>
+          ) : (
+            <p className="text-txt-muted italic mb-3">No general instructions set.</p>
           )}
-          {productionRecord.artisanNote && (
+          {artisanNote ? (
             <p className="leading-relaxed">
               <strong className="text-primary-gold uppercase tracking-wider text-xs block mb-0.5">Balinese Artisan Craftsmanship:</strong> 
-              {productionRecord.artisanNote}
+              {artisanNote}
             </p>
+          ) : (
+            <p className="text-txt-muted italic">No Balinese craftsmanship notes set.</p>
           )}
         </div>
       )}
 
       <div className="space-y-6">
         {order.items.map((item) => {
-          const code = item.product ? item.product.styleCode : 'UNKNOWN'
-          const name = item.product ? item.product.productName : 'Unknown Product'
+          const code = item.styleCode || (item.product ? item.product.styleCode : 'UNKNOWN')
+          const name = item.productName || (item.product ? item.product.productName : 'Unknown Product')
           const material = item.material || (item.product ? item.product.material : 'N/A')
           const notes = item.specialRequest || 'No special requests.'
           const warning = !item.productId || item.size === 'NEEDS CONFIRMATION' || item.size === 'UNKNOWN'

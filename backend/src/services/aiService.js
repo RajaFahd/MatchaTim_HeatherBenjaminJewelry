@@ -5,18 +5,19 @@ require('dotenv').config();
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const openRouterApiKey = process.env.OPENROUTER_API_KEY;
-let openai;
-let isGeminiStudio = false;
+let geminiClient = null;
+let openRouterClient = null;
 
 if (geminiApiKey && !geminiApiKey.includes('placeholder')) {
-  openai = new OpenAI({
+  geminiClient = new OpenAI({
     baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
     apiKey: geminiApiKey
   });
-  isGeminiStudio = true;
   console.log('Using Google Gemini AI Studio client');
-} else if (openRouterApiKey && !openRouterApiKey.includes('placeholder')) {
-  openai = new OpenAI({
+}
+
+if (openRouterApiKey && !openRouterApiKey.includes('placeholder')) {
+  openRouterClient = new OpenAI({
     baseURL: 'https://openrouter.ai/api/v1',
     apiKey: openRouterApiKey,
     defaultHeaders: {
@@ -76,47 +77,44 @@ function getFallbackExtraction(fileName, catalogProducts) {
  * @param {Array} catalogProducts - Current list of products from DB
  */
 exports.extractPurchaseOrder = async (fileBuffer, mimeType, originalName, catalogProducts = []) => {
-  // If API key is not configured, use fallback simulation
-  if (!openai) {
+  // If no API key is configured, use fallback simulation
+  if (!geminiClient && !openRouterClient) {
     return getFallbackExtraction(originalName, catalogProducts);
   }
 
-  try {
-    const model = isGeminiStudio ? 'gemini-2.5-flash' : 'google/gemini-2.5-flash';
-    const systemPrompt = getSystemPrompt(catalogProducts);
-    const messages = [];
+  // 1. Run file parsing via parserService
+  const parsedResult = await parserService.parseFile(fileBuffer, mimeType);
 
-    // 1. Run file parsing via parserService
-    const parsedResult = await parserService.parseFile(fileBuffer, mimeType);
+  // 2. Prepare message body based on parser output type
+  const systemPrompt = getSystemPrompt(catalogProducts);
+  const messages = [];
 
-    // 2. Prepare message body based on parser output type
-    if (parsedResult && parsedResult.isImage) {
-      // Vision Model Call
-      messages.push({
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: `${systemPrompt}\n\nPlease extract the purchase order data from the attached image.`
-          },
-          {
-            type: 'image_url',
-            image_url: {
-              url: `data:${parsedResult.mimeType};base64,${parsedResult.base64Data}`
-            }
+  if (parsedResult && parsedResult.isImage) {
+    messages.push({
+      role: 'user',
+      content: [
+        {
+          type: 'text',
+          text: `${systemPrompt}\n\nPlease extract the purchase order data from the attached image.`
+        },
+        {
+          type: 'image_url',
+          image_url: {
+            url: `data:${parsedResult.mimeType};base64,${parsedResult.base64Data}`
           }
-        ]
-      });
-    } else {
-      // Text Model Call (PDF, Excel, Plain Text)
-      messages.push({
-        role: 'user',
-        content: `${systemPrompt}\n\nPlease extract the purchase order data from the following parsed document content:\n\n${parsedResult}`
-      });
-    }
+        }
+      ]
+    });
+  } else {
+    messages.push({
+      role: 'user',
+      content: `${systemPrompt}\n\nPlease extract the purchase order data from the following parsed document content:\n\n${parsedResult}`
+    });
+  }
 
-    // 3. Request completion using JSON Schema (Structured Output)
-    const response = await openai.chat.completions.create({
+  // Helper to execute completion
+  const runCompletion = async (client, model) => {
+    const response = await client.chat.completions.create({
       model: model,
       messages: messages,
       response_format: {
@@ -223,9 +221,37 @@ exports.extractPurchaseOrder = async (fileBuffer, mimeType, originalName, catalo
         }
       }
     });
+    return response.choices[0].message.content.trim();
+  };
 
-    const responseText = response.choices[0].message.content.trim();
-    
+  let responseText = null;
+
+  // Try Gemini API first
+  if (geminiClient) {
+    try {
+      console.log('Attempting AI extraction via Google Gemini Studio...');
+      responseText = await runCompletion(geminiClient, 'gemini-2.5-flash');
+    } catch (err) {
+      console.warn('Gemini Studio extraction failed or rate-limited:', err.message);
+    }
+  }
+
+  // Fallback to OpenRouter if Gemini failed
+  if (!responseText && openRouterClient) {
+    try {
+      console.log('Attempting AI extraction via OpenRouter (google/gemini-2.5-flash)...');
+      responseText = await runCompletion(openRouterClient, 'google/gemini-2.5-flash');
+    } catch (err) {
+      console.warn('OpenRouter extraction failed:', err.message);
+    }
+  }
+
+  if (!responseText) {
+    console.warn('All AI clients failed. Falling back to mock extraction.');
+    return getFallbackExtraction(originalName, catalogProducts);
+  }
+
+  try {
     let jsonString = responseText;
     const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || responseText.match(/```\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
@@ -234,9 +260,8 @@ exports.extractPurchaseOrder = async (fileBuffer, mimeType, originalName, catalo
 
     const extractedData = JSON.parse(jsonString);
     return extractedData;
-
-  } catch (error) {
-    console.error('AI extraction error in aiService:', error);
+  } catch (parseError) {
+    console.error('Error parsing AI JSON response:', parseError);
     return getFallbackExtraction(originalName, catalogProducts);
   }
 };

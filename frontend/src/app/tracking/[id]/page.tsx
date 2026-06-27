@@ -8,12 +8,19 @@ interface TrackingRecord {
   updatedAt: string
 }
 
+interface PackingRecord {
+  id: string
+  packingNote?: string
+  checklist?: any
+}
+
 interface Order {
   id: string
   poNumber: string
   customerName: string
   status: string
   trackings: TrackingRecord[]
+  packings?: PackingRecord[]
 }
 
 export default function TrackingPage() {
@@ -77,15 +84,39 @@ export default function TrackingPage() {
     }
   }
 
+  const getStepInfo = (key: string, backendStatuses: string[]) => {
+    const statusChecklist = order.packings?.[0]?.checklist?.statusChecklist || {}
+    const isChecked = !!statusChecklist[key]
+    
+    const record = order.trackings.find(t => backendStatuses.includes(t.status))
+    const isDone = isChecked || !!record
+    
+    if (!isDone) return { done: false, date: '—' }
+    
+    const targetRecord = record || order.trackings.find(t => t.status === order.status) || order.trackings[order.trackings.length - 1]
+    const dateStr = targetRecord ? targetRecord.updatedAt : null
+    
+    try {
+      const date = dateStr ? new Date(dateStr).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) : 'Completed'
+      return { done: true, date }
+    } catch {
+      return { done: true, date: 'Completed' }
+    }
+  }
+
   const steps = [
     { label: 'Order Received', ...getStatusInfo(['Uploaded', 'Reviewed', 'Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
-    { label: 'Invoice Issued', ...getStatusInfo(['Reviewed', 'Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
-    { label: 'Deposit Tracked', ...getStatusInfo(['Reviewed', 'Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
-    { label: 'Material Preparation', ...getStatusInfo(['Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
-    { label: 'In Production', ...getStatusInfo(['Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
-    { label: 'Quality Control (QC)', ...getStatusInfo(['QC', 'Packing', 'Shipping', 'Completed']) },
-    { label: 'Packed & Ready', ...getStatusInfo(['Packing', 'Shipping', 'Completed']) },
-    { label: 'Shipped', ...getStatusInfo(['Shipping', 'Completed']) },
+    { label: 'Invoice Issued', ...getStepInfo('invoiced', ['Reviewed', 'Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'Deposit Tracked', ...getStepInfo('deposit', ['Reviewed', 'Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'Material Preparation', ...getStepInfo('materials', ['Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'In Production', ...getStepInfo('production', ['Production', 'QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'Quality Control (QC)', ...getStepInfo('qc', ['QC', 'Packing', 'Shipping', 'Completed']) },
+    { label: 'Packed & Ready', ...getStepInfo('packed', ['Packing', 'Shipping', 'Completed']) },
+    { label: 'Shipped', ...getStepInfo('shipped', ['Shipping', 'Completed']) },
   ]
 
   const currentStep = steps.filter(s => s.done).length

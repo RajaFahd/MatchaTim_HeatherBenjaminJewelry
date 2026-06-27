@@ -20,8 +20,8 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { status } = req.query;
-    const orders = await orderService.getAllOrders(status);
+    const { search, status, date, customer, sortBy, isArchived, isDeleted } = req.query;
+    const orders = await orderService.getAllOrders({ search, status, date, customer, sortBy, isArchived, isDeleted });
     return res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -73,6 +73,62 @@ router.put('/:id/packing', authMiddleware, async (req, res) => {
     return res.status(200).json({
       message: 'Packing details and checklist updated successfully.',
       packing
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.put('/:id/production', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { productionNote, artisanNote } = req.body;
+    const production = await orderService.updateProduction(id, { productionNote, artisanNote });
+    return res.status(200).json({
+      message: 'Production instructions updated successfully.',
+      production
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Soft Delete Order
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await orderService.softDeleteOrder(id);
+    return res.status(200).json({
+      message: 'Order soft deleted successfully.',
+      order
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Archive Order
+router.put('/:id/archive', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await orderService.archiveOrder(id);
+    return res.status(200).json({
+      message: 'Order archived successfully.',
+      order
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Restore Order
+router.put('/:id/restore', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await orderService.restoreOrder(id);
+    return res.status(200).json({
+      message: 'Order restored successfully.',
+      order
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
