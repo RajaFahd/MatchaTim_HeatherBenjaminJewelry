@@ -405,7 +405,7 @@ export default function Dashboard() {
                             </button>
                           </>
                         )}
-                        {viewMode === 'deleted' && (
+                        {false && (
                           <button
                             onClick={() => handleRestore(o.id)}
                             className="text-primary-gold hover:text-opacity-80 text-xs font-semibold uppercase tracking-wider transition bg-transparent border-none p-0 cursor-pointer"
