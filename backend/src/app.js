@@ -42,6 +42,10 @@ app.use('/api/auth', authRouter);
 app.use('/api/products', productRouter);
 app.use('/api/orders', orderRouter);
 
+// Serve static images from the data/images folder
+const path = require('path');
+app.use('/data/images', express.static(path.join(__dirname, '../../data/images')));
+
 // Health check and root API endpoint
 app.get('/api', (req, res) => {
   res.status(200).json({
