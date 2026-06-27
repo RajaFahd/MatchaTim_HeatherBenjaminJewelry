@@ -366,25 +366,27 @@ class OrderRepository {
         data: orderData
       });
 
-      // 2. Update order items
+      // 2. Delete existing items
+      await tx.orderItem.deleteMany({
+        where: { orderId: id }
+      });
+
+      // 3. Create updated items
       if (itemsData && itemsData.length > 0) {
-        for (const item of itemsData) {
-          if (item.id) {
-            await tx.orderItem.update({
-               where: { id: item.id },
-               data: {
-                 productId: item.productId,
-                 styleCode: item.styleCode,
-                 productName: item.productName,
-                 unitPrice: item.unitPrice,
-                 quantity: item.quantity,
-                 size: item.size,
-                 material: item.material,
-                 specialRequest: item.specialRequest
-               }
-             });
-          }
-        }
+        const itemsWithOrderId = itemsData.map(item => ({
+          orderId: id,
+          productId: item.productId,
+          styleCode: item.styleCode,
+          productName: item.productName,
+          unitPrice: item.unitPrice,
+          quantity: item.quantity,
+          size: item.size,
+          material: item.material,
+          specialRequest: item.specialRequest
+        }));
+        await tx.orderItem.createMany({
+          data: itemsWithOrderId
+        });
       }
 
       return order;
