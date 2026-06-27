@@ -14,6 +14,24 @@ interface Order {
   items?: OrderItem[]
 }
 
+const getOrderViewRoute = (status: string, orderId: string) => {
+  switch (status) {
+    case 'Uploaded':
+    case 'Reviewed':
+      return `/review/${orderId}`
+    case 'Production':
+      return `/production/${orderId}`
+    case 'QC':
+    case 'Packing':
+      return `/packing/${orderId}`
+    case 'Shipping':
+    case 'Completed':
+      return `/tracking/${orderId}`
+    default:
+      return `/review/${orderId}`
+  }
+}
+
 export default function Dashboard() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -24,6 +42,18 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState('newest')
   const [uniqueCustomers, setUniqueCustomers] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<'active' | 'archived'>('active')
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    type: 'confirm-delete' | 'confirm-archive' | 'success' | 'error';
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  })
 
   // Fetch unique customers list on mount
   useEffect(() => {
@@ -85,41 +115,76 @@ export default function Dashboard() {
     return () => clearTimeout(delayDebounceFn);
   }, [search, status, date, customer, sortBy, viewMode]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this order?')) return;
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/orders/${id}`, {
-        method: 'DELETE',
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to delete order');
+  const handleDelete = (id: string) => {
+    setModalConfig({
+      isOpen: true,
+      type: 'confirm-delete',
+      title: 'Delete Purchase Order',
+      message: 'Are you sure you want to delete this order? This action cannot be undone and duplicate orders cannot be deleted.',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`/api/orders/${id}`, {
+            method: 'DELETE',
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Failed to delete order');
+          }
+          setOrders(prev => prev.filter(o => o.id !== id));
+          setModalConfig({
+            isOpen: true,
+            type: 'success',
+            title: 'Deleted Successfully',
+            message: 'The purchase order has been deleted.',
+          });
+        } catch (err: any) {
+          setModalConfig({
+            isOpen: true,
+            type: 'error',
+            title: 'Delete Failed',
+            message: err.message || 'An unexpected error occurred.',
+          });
+        }
       }
-      alert('Order successfully deleted.');
-      setOrders(prev => prev.filter(o => o.id !== id));
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
-    }
+    });
   };
 
-  const handleArchive = async (id: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/orders/${id}/archive`, {
-        method: 'PUT',
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to archive order');
+  const handleArchive = (id: string) => {
+    setModalConfig({
+      isOpen: true,
+      type: 'confirm-archive',
+      title: 'Archive Purchase Order',
+      message: 'Are you sure you want to archive this order? It will be moved to the archived section.',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`/api/orders/${id}/archive`, {
+            method: 'PUT',
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Failed to archive order');
+          }
+          setOrders(prev => prev.filter(o => o.id !== id));
+          setModalConfig({
+            isOpen: true,
+            type: 'success',
+            title: 'Archived Successfully',
+            message: 'The purchase order has been archived.',
+          });
+        } catch (err: any) {
+          setModalConfig({
+            isOpen: true,
+            type: 'error',
+            title: 'Archive Failed',
+            message: err.message || 'An unexpected error occurred.',
+          });
+        }
       }
-      alert('Order successfully archived.');
-      setOrders(prev => prev.filter(o => o.id !== id));
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
-    }
+    });
   };
 
   const handleRestore = async (id: string) => {
@@ -133,23 +198,46 @@ export default function Dashboard() {
       if (!res.ok) {
         throw new Error(data.error || 'Failed to restore order');
       }
-      alert('Order successfully restored.');
       setOrders(prev => prev.filter(o => o.id !== id));
+      setModalConfig({
+        isOpen: true,
+        type: 'success',
+        title: 'Restored Successfully',
+        message: 'The purchase order has been restored to active orders.',
+      });
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      setModalConfig({
+        isOpen: true,
+        type: 'error',
+        title: 'Restore Failed',
+        message: err.message || 'An unexpected error occurred.',
+      });
     }
   };
 
-  const statusColor: Record<string, string> = {
-    'Pending': 'bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-400',
-    'Uploaded': 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400',
-    'Reviewed': 'bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400',
-    'Production': 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400',
-    'In Production': 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400',
-    'QC': 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400',
-    'Packing': 'bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400',
-    'Shipping': 'bg-teal-100 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400',
-    'Completed': 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400',
+  const getStatusColorClass = (status: string) => {
+    const key = (status || '').trim().toLowerCase();
+    switch (key) {
+      case 'pending':
+        return 'bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/40';
+      case 'uploaded':
+        return 'bg-purple-100 text-purple-900 border border-purple-300 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900/40';
+      case 'reviewed':
+        return 'bg-indigo-100 text-indigo-900 border border-indigo-300 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900/40';
+      case 'production':
+      case 'in production':
+        return 'bg-blue-100 text-blue-900 border border-blue-300 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/40';
+      case 'qc':
+        return 'bg-orange-100 text-orange-900 border border-orange-300 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-900/40';
+      case 'packing':
+        return 'bg-rose-100 text-rose-900 border border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/40';
+      case 'shipping':
+        return 'bg-teal-100 text-teal-900 border border-teal-300 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-900/40';
+      case 'completed':
+        return 'bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/40';
+      default:
+        return 'bg-bg-main text-txt-muted border border-border-main';
+    }
   }
 
   const formatItemsCount = (items: OrderItem[] | undefined) => {
@@ -357,7 +445,7 @@ export default function Dashboard() {
                     <td className="px-6 py-4 text-txt-muted">{formatItemsCount(o.items)}</td>
                     <td className="px-6 py-4 text-txt-muted text-xs">{formatDate(o.createdAt)}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${statusColor[o.status] || 'bg-bg-main text-txt-muted'}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${getStatusColorClass(o.status)}`}>
                         {o.status}
                       </span>
                     </td>
@@ -365,7 +453,7 @@ export default function Dashboard() {
                       <div className="flex items-center gap-4">
                         {viewMode === 'active' && (
                           <>
-                            <a href={`/review/${o.id}`} className="text-primary-gold hover:underline text-xs font-semibold uppercase tracking-wider transition">
+                            <a href={getOrderViewRoute(o.status, o.id)} className="text-primary-gold hover:underline text-xs font-semibold uppercase tracking-wider transition">
                               View
                             </a>
                             <button
@@ -386,7 +474,7 @@ export default function Dashboard() {
                         )}
                         {viewMode === 'archived' && (
                           <>
-                            <a href={`/review/${o.id}`} className="text-primary-gold hover:underline text-xs font-semibold uppercase tracking-wider transition font-semibold">
+                            <a href={getOrderViewRoute(o.status, o.id)} className="text-primary-gold hover:underline text-xs font-semibold uppercase tracking-wider transition font-semibold">
                               View
                             </a>
                             <button
@@ -420,6 +508,93 @@ export default function Dashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+      {modalConfig.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-bg-card border border-border-main rounded-card max-w-md w-full overflow-hidden shadow-2xl transition-all duration-300">
+            {/* Header / Accent Bar */}
+            <div className={`h-1.5 w-full ${
+              modalConfig.type === 'confirm-delete' || modalConfig.type === 'error'
+                ? 'bg-gradient-to-r from-red-500 to-rose-600'
+                : modalConfig.type === 'confirm-archive'
+                ? 'bg-gradient-to-r from-primary-gold to-amber-500'
+                : 'bg-gradient-to-r from-green-500 to-emerald-600'
+            }`} />
+            
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                {/* Icon wrapper */}
+                <div className={`p-2.5 rounded-full flex-shrink-0 ${
+                  modalConfig.type === 'confirm-delete' || modalConfig.type === 'error'
+                    ? 'bg-red-500/10 text-red-500'
+                    : modalConfig.type === 'confirm-archive'
+                    ? 'bg-primary-gold/10 text-primary-gold'
+                    : 'bg-green-500/10 text-green-500'
+                }`}>
+                  {modalConfig.type === 'confirm-delete' && (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  )}
+                  {modalConfig.type === 'confirm-archive' && (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                  )}
+                  {modalConfig.type === 'success' && (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
+                  {modalConfig.type === 'error' && (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="text-base font-semibold text-txt-main font-display mb-1">{modalConfig.title}</h3>
+                  <p className="text-sm text-txt-muted leading-relaxed">{modalConfig.message}</p>
+                </div>
+              </div>
+
+              {/* Actions Footer */}
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border-main">
+                {modalConfig.type.startsWith('confirm-') ? (
+                  <>
+                    <button
+                      onClick={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+                      className="px-4 py-2 text-xs font-semibold text-txt-muted hover:text-txt-main bg-transparent hover:bg-bg-main border border-border-main hover:border-txt-muted rounded-btn transition duration-200 cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        setModalConfig(prev => ({ ...prev, isOpen: false }));
+                        if (modalConfig.onConfirm) modalConfig.onConfirm();
+                      }}
+                      className={`px-4 py-2 text-xs font-semibold text-white rounded-btn transition duration-200 cursor-pointer ${
+                        modalConfig.type === 'confirm-delete'
+                          ? 'bg-red-500 hover:bg-red-600'
+                          : 'bg-primary-gold hover:bg-opacity-95'
+                      }`}
+                    >
+                      {modalConfig.type === 'confirm-delete' ? 'Delete' : 'Archive'}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+                    className="px-4 py-2 text-xs font-semibold text-white bg-primary-gold hover:bg-opacity-95 rounded-btn transition duration-200 cursor-pointer"
+                  >
+                    Dismiss
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

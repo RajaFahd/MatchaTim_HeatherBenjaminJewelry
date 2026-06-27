@@ -1,6 +1,7 @@
 'use client'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import WorkflowStepper from '@/components/WorkflowStepper'
 
 interface Product {
   styleCode: string
@@ -36,6 +37,28 @@ interface Order {
   productions: Production[]
 }
 
+const resolveProductImageUrl = (url?: string) => {
+  if (!url) return '';
+  const trimmedUrl = url.trim();
+  if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://') || trimmedUrl.startsWith('data:')) {
+    return trimmedUrl;
+  }
+  const parts = trimmedUrl.split('/');
+  const filename = parts[parts.length - 1];
+  return `https://mknbwdffgngnnontrvou.supabase.co/storage/v1/object/public/product-image/${filename}`;
+};
+
+const getDisplayImageUrl = (item: any) => {
+  if (item?.product?.imageUrl) {
+    return resolveProductImageUrl(item.product.imageUrl);
+  }
+  const code = item?.styleCode || item?.product?.styleCode;
+  if (code && code.trim().match(/^HB\d+$/i)) {
+    return `https://mknbwdffgngnnontrvou.supabase.co/storage/v1/object/public/product-image/${code.trim().toUpperCase()}.jpg`;
+  }
+  return '';
+};
+
 export default function ProductionPage() {
   const params = useParams()
   const router = useRouter()
@@ -44,6 +67,7 @@ export default function ProductionPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [activeImage, setActiveImage] = useState<{ src: string; alt: string } | null>(null)
 
   const [productionNote, setProductionNote] = useState('')
   const [artisanNote, setArtisanNote] = useState('')
@@ -167,6 +191,7 @@ export default function ProductionPage() {
 
   return (
     <main className="w-full">
+      <WorkflowStepper currentStep="production" orderStatus={order.status} orderId={order.id} />
       <a href={`/review/${order.id}`} className="text-xs font-bold uppercase tracking-wider text-txt-muted hover:text-primary-gold mb-6 inline-block transition">
         ← Back to Review
       </a>
@@ -284,11 +309,19 @@ export default function ProductionPage() {
               <div className="px-6 py-4 flex flex-col md:flex-row gap-6">
                 {/* Product Image */}
                 <div className="w-24 h-24 flex-shrink-0">
-                  {item.product?.imageUrl ? (
+                  {getDisplayImageUrl(item) ? (
                     <img 
-                      src={item.product.imageUrl} 
+                      src={getDisplayImageUrl(item)} 
                       alt={name} 
-                      className="w-full h-full object-cover rounded-image border border-border-main"
+                      className="w-full h-full object-cover rounded-image border border-border-main cursor-zoom-in hover:brightness-95 active:scale-95 transition-all duration-200"
+                      onClick={() => {
+                        const src = getDisplayImageUrl(item);
+                        if (src) setActiveImage({ src, alt: name });
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%237A7A7A' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E";
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full bg-bg-main border border-border-main rounded-image flex items-center justify-center text-txt-muted text-xs text-center p-2">
@@ -308,6 +341,34 @@ export default function ProductionPage() {
           )
         })}
       </div>
+
+      {/* Lightbox Modal */}
+      {activeImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md transition-opacity duration-300 cursor-zoom-out"
+          onClick={() => setActiveImage(null)}
+        >
+          <div className="relative max-w-[90vw] max-h-[85vh] p-2 flex flex-col items-center animate-scale-up" onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setActiveImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors p-2 bg-black/40 hover:bg-black/60 rounded-full focus:outline-none cursor-pointer"
+              title="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <img 
+              src={activeImage.src} 
+              alt={activeImage.alt} 
+              className="max-w-full max-h-[75vh] rounded-lg object-contain shadow-2xl border border-white/10"
+            />
+            <p className="mt-4 text-white font-mono text-sm bg-black/60 px-4 py-2 rounded-full border border-white/10 backdrop-blur-sm">
+              {activeImage.alt}
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

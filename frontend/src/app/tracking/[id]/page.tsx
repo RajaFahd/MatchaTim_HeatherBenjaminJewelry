@@ -1,6 +1,7 @@
 'use client'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import WorkflowStepper from '@/components/WorkflowStepper'
 
 interface TrackingRecord {
   id: string
@@ -123,6 +124,7 @@ export default function TrackingPage() {
 
   return (
     <main className="max-w-2xl mx-auto py-8">
+      <WorkflowStepper currentStep="tracking" orderStatus={order.status} orderId={order.id} />
       <a href={`/packing/${order.id}`} className="text-xs font-bold uppercase tracking-wider text-txt-muted hover:text-primary-gold mb-6 inline-block transition">
         ← Back to Packing
       </a>
