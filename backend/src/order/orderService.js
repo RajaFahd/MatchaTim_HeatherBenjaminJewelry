@@ -48,10 +48,10 @@ class OrderService {
     let itemsData = [];
     const rawItems = aiResult.products || aiResult.items || [];
     if (rawItems.length > 0) {
-      itemsData = rawItems.map(item => {
+      const mappedItems = rawItems.map(item => {
         // Find matching product in catalog
         const matchedProduct = products?.find(
-          p => p.styleCode.toLowerCase().replace(/[\s-_]/g, '') === item.style_code.toLowerCase().replace(/[\s-_]/g, '')
+          p => p.styleCode.toLowerCase().replace(/[\s-_]/g, '') === (item.style_code || '').toLowerCase().replace(/[\s-_]/g, '')
         );
 
         return {
@@ -65,6 +65,28 @@ class OrderService {
           specialRequest: item.special_notes || item.special_request || null
         };
       });
+
+      // Merge items if they have exactly the same details (styleCode, size, material, specialRequest)
+      const mergedMap = new Map();
+      for (const item of mappedItems) {
+        const key = [
+          (item.styleCode || '').toLowerCase().trim(),
+          (item.size || '').toLowerCase().trim(),
+          (item.material || '').toLowerCase().trim(),
+          (item.specialRequest || '').toLowerCase().trim()
+        ].join('|');
+
+        if (mergedMap.has(key)) {
+          const existing = mergedMap.get(key);
+          existing.quantity += item.quantity;
+          if (existing.unitPrice <= 0 && item.unitPrice > 0) {
+            existing.unitPrice = item.unitPrice;
+          }
+        } else {
+          mergedMap.set(key, { ...item });
+        }
+      }
+      itemsData = Array.from(mergedMap.values());
     }
 
     // 6. Construct Production Data

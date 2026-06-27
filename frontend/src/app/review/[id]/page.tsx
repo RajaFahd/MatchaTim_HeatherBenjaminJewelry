@@ -201,6 +201,21 @@ export default function ReviewPage() {
   return (
     <main className="w-full">
       <WorkflowStepper currentStep="review" orderStatus={order.status} orderId={order.id} />
+      
+      {order.items.some(item => !item.productId || !item.product) && (
+        <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-card flex gap-3.5 items-start text-amber-800 dark:text-amber-300">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 flex-shrink-0 mt-0.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <h4 className="text-sm font-semibold">Terdapat Kode Produk Tidak Dikenal</h4>
+            <p className="text-xs mt-1 opacity-90 leading-relaxed">
+              Satu atau beberapa item memiliki kode produk yang tidak terdaftar di katalog. Silakan edit kode produk tersebut menjadi kode yang terdaftar di katalog agar pesanan dapat diproses ke tahapan berikutnya.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-6">
         <a href="/dashboard" className="text-xs font-bold uppercase tracking-wider text-txt-muted hover:text-primary-gold transition">
           ← Back to Dashboard
@@ -280,12 +295,15 @@ export default function ReviewPage() {
                 <th className="px-6 py-3 font-semibold">Size</th>
                 <th className="px-6 py-3 font-semibold">Material</th>
                 <th className="px-6 py-3 font-semibold">Price</th>
+                {isEditing && <th className="px-6 py-3 font-semibold w-16 text-center">Action</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-border-main">
               {isEditing ? (
-                editItems.map((item, index) => (
-                  <tr key={item.id} className="hover:bg-bg-main/10 transition-colors">
+                editItems.map((item, index) => {
+                  const isUnknown = !order.items[index]?.productId && !order.items[index]?.product;
+                  return (
+                    <tr key={item.id} className={`hover:bg-bg-main/10 transition-colors ${isUnknown ? 'bg-amber-500/5 dark:bg-amber-950/10 border-l-4 border-l-amber-500' : ''}`}>
                     <td className="px-4 py-3">
                       {getDisplayImageUrl({ product: order.items[index]?.product, styleCode: item.styleCode }) ? (
                         <img 
@@ -312,8 +330,13 @@ export default function ReviewPage() {
                         type="text"
                         value={item.styleCode}
                         onChange={e => handleItemChange(index, 'styleCode', e.target.value)}
-                        className="w-28 h-9 border border-border-main rounded-btn bg-bg-main px-2 text-xs font-mono text-primary-gold focus:border-primary-gold focus:outline-none transition"
+                        className={`w-28 h-9 border rounded-btn bg-bg-main px-2 text-xs font-mono text-primary-gold focus:outline-none transition ${isUnknown ? 'border-amber-500 ring-1 ring-amber-500/20' : 'border-border-main focus:border-primary-gold'}`}
                       />
+                      {isUnknown && (
+                        <span className="block text-[9px] text-amber-600 dark:text-amber-400 mt-1 font-sans">
+                          ⚠️ Tidak di katalog
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1.5 w-full min-w-[220px]">
@@ -368,8 +391,24 @@ export default function ReviewPage() {
                         className="w-20 h-9 border border-border-main rounded-btn bg-bg-main px-2 text-xs text-txt-main focus:border-primary-gold focus:outline-none transition"
                       />
                     </td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = editItems.filter((_, idx) => idx !== index);
+                          setEditItems(updated);
+                        }}
+                        className="text-error-red hover:text-red-700 transition p-2 bg-error-red/10 hover:bg-error-red/20 rounded-btn cursor-pointer inline-flex items-center justify-center"
+                        title="Hapus Item"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </td>
                   </tr>
-                ))
+                  );
+                })
               ) : (
                 order.items.map((item) => {
                   const code = item.styleCode || (item.product ? item.product.styleCode : 'UNKNOWN');
@@ -378,9 +417,10 @@ export default function ReviewPage() {
                     ? `$${Number(item.unitPrice).toFixed(2)}`
                     : (item.product ? `$${Number(item.product.wholesalePrice).toFixed(2)}` : '—');
                   const isOk = item.size && item.size !== 'NEEDS CONFIRMATION' && item.size !== 'UNKNOWN';
+                  const isUnknownProduct = !item.productId && !item.product;
 
                   return (
-                    <tr key={item.id} className="hover:bg-bg-main/20 transition-colors">
+                    <tr key={item.id} className={`hover:bg-bg-main/20 transition-colors ${isUnknownProduct ? 'bg-amber-500/5 dark:bg-amber-950/10 border-l-4 border-l-amber-500' : ''}`}>
                       <td className="px-6 py-3">
                         {getDisplayImageUrl(item) ? (
                           <img 
@@ -402,7 +442,14 @@ export default function ReviewPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 font-mono font-semibold text-primary-gold">{code}</td>
+                      <td className="px-6 py-4 font-mono font-semibold text-primary-gold">
+                        {code}
+                        {isUnknownProduct && (
+                          <span className="block text-[10px] text-amber-600 dark:text-amber-400 font-sans mt-0.5">
+                            ⚠️ Tidak di katalog
+                          </span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-txt-main">{name}</td>
                       <td className="px-6 py-4 text-txt-main font-medium">{item.quantity} pcs</td>
                       <td className="px-6 py-4">
@@ -436,7 +483,9 @@ export default function ReviewPage() {
         ) : (
           <button 
             onClick={handleCreateInstructions}
-            className="w-full sm:w-auto px-6 py-3.5 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-xs font-semibold tracking-wider uppercase transition duration-300 cursor-pointer text-center"
+            disabled={order.items.some(item => !item.productId || !item.product)}
+            className="w-full sm:w-auto px-6 py-3.5 bg-primary-gold hover:bg-opacity-95 text-white rounded-btn text-xs font-semibold tracking-wider uppercase transition duration-300 cursor-pointer text-center disabled:opacity-40 disabled:cursor-not-allowed"
+            title={order.items.some(item => !item.productId || !item.product) ? "Harap perbaiki atau hapus kode produk yang tidak terdaftar di katalog terlebih dahulu" : undefined}
           >
             Create Production Instructions →
           </button>
