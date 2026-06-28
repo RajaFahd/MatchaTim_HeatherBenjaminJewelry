@@ -1,0 +1,111 @@
+<svg viewBox="0 0 1100 760" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="archBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E1E1E"/>
+      <stop offset="100%" stop-color="#262626"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#C6A55A"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="760" fill="url(#archBg)"/>
+  <text x="550" y="46" text-anchor="middle" font-family="Georgia, serif" font-size="26" font-weight="700" fill="#FAF8F4">Arsitektur Sistem</text>
+  <text x="550" y="72" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#7A7A7A">Monolithic Backend + External AI Service</text>
+
+  <!-- Customer -->
+  <g transform="translate(550,120)">
+    <circle r="26" fill="none" stroke="#C6A55A" stroke-width="2"/>
+    <circle cx="0" cy="-7" r="8" fill="#C6A55A"/>
+    <path d="M -13,14 C -13,0 13,0 13,14 Z" fill="#C6A55A"/>
+    <text x="0" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#FAF8F4" font-weight="600">Customer</text>
+  </g>
+  <line x1="550" y1="190" x2="550" y2="222" stroke="#C6A55A" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="566" y="210" font-family="Inter, sans-serif" font-size="11" fill="#C9C9C9">Upload PO (PDF/Excel/Gambar)</text>
+
+  <!-- Frontend -->
+  <rect x="380" y="226" width="340" height="64" rx="10" fill="#2A2A2A" stroke="#C6A55A" stroke-width="1.5"/>
+  <g transform="translate(408,244)">
+    <rect x="0" y="0" width="26" height="20" rx="2" fill="none" stroke="#E8D9B5" stroke-width="2"/>
+    <line x1="0" y1="6" x2="26" y2="6" stroke="#E8D9B5" stroke-width="1.5"/>
+  </g>
+  <text x="550" y="256" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="700" fill="#FAF8F4">Frontend</text>
+  <text x="550" y="276" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#C9C9C9">Next.js 16 (App Router) · React 19 · Tailwind</text>
+
+  <line x1="550" y1="290" x2="550" y2="322" stroke="#C6A55A" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="566" y="310" font-family="Inter, sans-serif" font-size="11" fill="#C9C9C9">REST API (HTTPS, rewrite proxy)</text>
+
+  <!-- Backend -->
+  <rect x="350" y="326" width="400" height="64" rx="10" fill="#2A2A2A" stroke="#C6A55A" stroke-width="1.5"/>
+  <g transform="translate(378,344)">
+    <rect x="2" y="0" width="22" height="7" rx="1.5" fill="none" stroke="#E8D9B5" stroke-width="1.5"/>
+    <rect x="2" y="9" width="22" height="7" rx="1.5" fill="none" stroke="#E8D9B5" stroke-width="1.5"/>
+    <rect x="2" y="18" width="22" height="7" rx="1.5" fill="none" stroke="#E8D9B5" stroke-width="1.5"/>
+  </g>
+  <text x="550" y="356" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="700" fill="#FAF8F4">Backend</text>
+  <text x="550" y="376" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#C9C9C9">Node.js · Express 5 · Prisma ORM</text>
+
+  <!-- branching lines to 3 services -->
+  <line x1="550" y1="390" x2="550" y2="420" stroke="#7A7A7A" stroke-width="1.5"/>
+  <line x1="195" y1="420" x2="905" y2="420" stroke="#7A7A7A" stroke-width="1.5"/>
+  <line x1="195" y1="420" x2="195" y2="452" stroke="#7A7A7A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="550" y1="420" x2="550" y2="452" stroke="#7A7A7A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="905" y1="420" x2="905" y2="452" stroke="#7A7A7A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- AI Engine -->
+  <rect x="70" y="456" width="250" height="100" rx="10" fill="#2A2A2A" stroke="#E8D9B5" stroke-width="1.5"/>
+  <g transform="translate(100,478)">
+    <circle r="14" cx="14" cy="14" fill="none" stroke="#E8D9B5" stroke-width="2"/>
+    <circle r="3" cx="14" cy="14" fill="#E8D9B5"/>
+    <line x1="14" y1="0" x2="14" y2="6" stroke="#E8D9B5" stroke-width="2"/>
+    <line x1="14" y1="22" x2="14" y2="28" stroke="#E8D9B5" stroke-width="2"/>
+    <line x1="0" y1="14" x2="6" y2="14" stroke="#E8D9B5" stroke-width="2"/>
+    <line x1="22" y1="14" x2="28" y2="14" stroke="#E8D9B5" stroke-width="2"/>
+  </g>
+  <text x="195" y="492" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#FAF8F4">AI Engine</text>
+  <text x="195" y="512" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#C9C9C9">Gemini 2.5 Flash</text>
+  <text x="195" y="528" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#C9C9C9">+ OpenRouter (fallback)</text>
+  <text x="195" y="546" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#7A7A7A">via SDK 'openai' custom base URL</text>
+
+  <!-- Prisma + Postgres -->
+  <rect x="425" y="456" width="250" height="100" rx="10" fill="#2A2A2A" stroke="#E8D9B5" stroke-width="1.5"/>
+  <g transform="translate(455,480)">
+    <ellipse cx="14" cy="4" rx="14" ry="5" fill="none" stroke="#E8D9B5" stroke-width="2"/>
+    <path d="M0,4 L0,20 C0,23 6,25.5 14,25.5 C22,25.5 28,23 28,20 L28,4" fill="none" stroke="#E8D9B5" stroke-width="2"/>
+    <path d="M0,12 C0,15 6,17.5 14,17.5 C22,17.5 28,15 28,12" fill="none" stroke="#E8D9B5" stroke-width="1.5"/>
+  </g>
+  <text x="550" y="492" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#FAF8F4">Database</text>
+  <text x="550" y="512" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#C9C9C9">PostgreSQL (Supabase)</text>
+  <text x="550" y="528" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#C9C9C9">diakses via Prisma ORM</text>
+
+  <!-- Supabase Storage -->
+  <rect x="780" y="456" width="250" height="100" rx="10" fill="#2A2A2A" stroke="#E8D9B5" stroke-width="1.5"/>
+  <g transform="translate(810,478)">
+    <path d="M2,8 L26,8 L26,26 L2,26 Z" fill="none" stroke="#E8D9B5" stroke-width="2"/>
+    <path d="M2,8 L8,2 L20,2 L26,8" fill="none" stroke="#E8D9B5" stroke-width="2"/>
+  </g>
+  <text x="905" y="492" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#FAF8F4">File Storage</text>
+  <text x="905" y="512" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#C9C9C9">Supabase Storage</text>
+  <text x="905" y="528" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#C9C9C9">file PO &amp; gambar produk</text>
+
+  <!-- convergence -->
+  <line x1="195" y1="556" x2="195" y2="600" stroke="#7A7A7A" stroke-width="1.5"/>
+  <line x1="550" y1="556" x2="550" y2="600" stroke="#7A7A7A" stroke-width="1.5"/>
+  <line x1="905" y1="556" x2="905" y2="600" stroke="#7A7A7A" stroke-width="1.5"/>
+  <line x1="195" y1="600" x2="905" y2="600" stroke="#7A7A7A" stroke-width="1.5"/>
+  <line x1="550" y1="600" x2="550" y2="632" stroke="#C6A55A" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Tracking Dashboard -->
+  <rect x="380" y="636" width="340" height="64" rx="10" fill="#2A2A2A" stroke="#C6A55A" stroke-width="1.5"/>
+  <g transform="translate(405,654)">
+    <rect x="0" y="14" width="6" height="10" fill="#C6A55A"/>
+    <rect x="9" y="8" width="6" height="16" fill="#C6A55A"/>
+    <rect x="18" y="2" width="6" height="22" fill="#C6A55A"/>
+  </g>
+  <text x="555" y="666" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="700" fill="#FAF8F4">Tracking Dashboard</text>
+  <text x="555" y="686" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#C9C9C9">Monitoring seluruh order &amp; status workflow</text>
+
+  <!-- legend -->
+  <text x="60" y="736" font-family="Inter, sans-serif" font-size="11" fill="#7A7A7A">Frontend: Next.js 16 / React 19 / Tailwind CSS 4</text>
+  <text x="60" y="752" font-family="Inter, sans-serif" font-size="11" fill="#7A7A7A">Backend: Express.js 5, layering Router → Service → Repository</text>
+</svg>
