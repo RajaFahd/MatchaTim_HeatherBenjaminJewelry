@@ -4,140 +4,140 @@
 
 # 💎 Heather Benjamin Jewelry — AI Order-to-Production Assistant
 
-> Mengubah Purchase Order pelanggan (PDF, Excel, atau gambar) menjadi instruksi produksi, panduan packing, dan tracking order yang rapi — secara otomatis menggunakan AI.
+> Automatically transform customer Purchase Orders (PDF, Excel, or image) into production instructions, packing guides, and organized order tracking — powered by AI.
 
 [![Node.js](https://img.shields.io/badge/Node.js-Express%205-339933?logo=node.js&logoColor=white)](#)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)](#)
 [![Prisma](https://img.shields.io/badge/Prisma-PostgreSQL-2D3748?logo=prisma&logoColor=white)](#)
 [![Supabase](https://img.shields.io/badge/Supabase-Storage-3ECF8E?logo=supabase&logoColor=white)](#)
-[![License](https://img.shields.io/badge/License-Proprietary-blue.svg)](#-lisensi)
+[![License](https://img.shields.io/badge/License-Proprietary-blue.svg)](#-license)
 
 ---
 
-## 📑 Daftar Isi
+## 📑 Table of Contents
 
-- [Tentang Project](#-tentang-project)
-- [Latar Belakang & Business Case](#-latar-belakang--business-case)
-- [Fitur Utama](#-fitur-utama)
+- [About the Project](#-about-the-project)
+- [Background & Business Case](#-background--business-case)
+- [Key Features](#-key-features)
 - [Tech Stack](#-tech-stack)
-- [Arsitektur Sistem](#-arsitektur-sistem)
-- [Struktur Folder](#-struktur-folder)
-- [Skema Database](#-skema-database)
-- [Alur Kerja AI](#-alur-kerja-ai)
-- [Instalasi & Menjalankan Project](#-instalasi--menjalankan-project)
+- [System Architecture](#-system-architecture)
+- [Folder Structure](#-folder-structure)
+- [Database Schema](#-database-schema)
+- [AI Workflow](#-ai-workflow)
+- [Installation & Running the Project](#-installation--running-the-project)
 - [Environment Variables](#-environment-variables)
-- [Dokumentasi API](#-dokumentasi-api)
-- [Halaman & Routing Frontend](#-halaman--routing-frontend)
-- [Status & Workflow Order](#-status--workflow-order)
+- [API Documentation](#-api-documentation)
+- [Frontend Pages & Routing](#-frontend-pages--routing)
+- [Order Status & Workflow](#-order-status--workflow)
 - [Design System](#-design-system)
-- [Keamanan](#-keamanan)
-- [Roadmap](#-roadmap--future-enhancement)
-- [Dokumen Terkait](#-dokumen-terkait)
-- [Tim & Pembagian Peran](#-tim--pembagian-peran)
-- [Lisensi](#-lisensi)
+- [Security](#-security)
+- [Roadmap](#-roadmap--future-enhancements)
+- [Related Documents](#-related-documents)
+- [Team & Roles](#-team--roles)
+- [License](#-license)
 
 ---
 
-## 📖 Tentang Project
+## 📖 About the Project
 
-**Heather Benjamin Jewelry** adalah brand perhiasan handmade premium yang berkolaborasi dengan pengrajin (artisan) dan mitra produksi di Bali. Saat ini, proses pengolahan **Purchase Order (PO)** dari customer wholesale masih dilakukan secara manual: membaca dokumen PO, mengidentifikasi produk, menyiapkan instruksi produksi, berkoordinasi dengan artisan, menyiapkan panduan packing, hingga update ke customer.
+**Heather Benjamin Jewelry** is a premium handmade jewelry brand that collaborates with artisans and production partners in Bali. Currently, the process of handling **Purchase Orders (POs)** from wholesale customers is done entirely manually: reading PO documents, identifying products, preparing production instructions, coordinating with artisans, creating packing guides, and updating customers.
 
-Proses manual ini **lambat, rawan kesalahan**, dan sangat bergantung pada pengetahuan founder.
+This manual process is **slow, error-prone**, and heavily dependent on the founder's personal knowledge.
 
-Project ini adalah **prototipe MVP hasil hackathon (48–72 jam)** yang membangun sebuah **AI Order-to-Production Assistant** — sebuah aplikasi web full-stack yang mampu:
+This project is an **MVP prototype built during a hackathon (48–72 hours)** — a full-stack web application that serves as an **AI Order-to-Production Assistant**, capable of:
 
-1. Menerima upload PO dalam format **PDF, Excel, atau gambar (JPEG/PNG/WEBP)**.
-2. Mengekstrak data PO (customer, nomor PO, produk, qty, material, size, catatan khusus) menggunakan **AI Vision/LLM**.
-3. Memvalidasi kelengkapan data (mendeteksi produk/size/material yang hilang).
-4. Menghasilkan **instruksi produksi** otomatis untuk artisan.
-5. Menghasilkan **panduan packing** beserta checklist.
-6. Melacak progres order dari awal sampai selesai lewat **tracking dashboard**.
+1. Accepting PO uploads in **PDF, Excel, or image (JPEG/PNG/WEBP)** format.
+2. Extracting PO data (customer, PO number, products, quantity, material, size, special notes) using **AI Vision/LLM**.
+3. Validating data completeness (detecting missing products, sizes, or materials).
+4. Automatically generating **production instructions** for artisans.
+5. Automatically generating **packing guides** with checklists.
+6. Tracking order progress from start to finish via a **tracking dashboard**.
 
 ---
 
-## 🎯 Latar Belakang & Business Case
+## 🎯 Background & Business Case
 
-Disarikan dari brief bisnis (lihat [`maua72.md`](./maua72.md)):
+Summarized from the business brief (see [`maua72.md`](./maua72.md)):
 
-- PO datang dalam berbagai format (PDF, spreadsheet, email, form pesanan) dan sering berisi banyak produk, style, material, dan permintaan khusus yang berbeda-beda.
-- Informasi kritikal tersebar di banyak tempat (spreadsheet, dokumen, gambar, email, chat), yang berisiko menyebabkan:
-  - Kesalahpahaman produksi
-  - Produk/qty salah
-  - Kesalahan packing
-  - Komunikasi customer yang lambat
-  - Order sulit ditrack
-  - Ketergantungan pada pengetahuan founder
+- POs arrive in various formats (PDF, spreadsheet, email, order form) and often contain many different products, styles, materials, and special requests.
+- Critical information is scattered across multiple places (spreadsheets, documents, images, emails, chats), which risks causing:
+  - Production misunderstandings
+  - Wrong products or quantities
+  - Packing errors
+  - Delayed customer communication
+  - Difficulty tracking orders
+  - Over-reliance on the founder's knowledge
 
-**Tujuan bisnis:** mengurangi waktu proses & koordinasi order sebesar **80%**, dengan workflow:
+**Business goal:** reduce order processing and coordination time by **80%**, with the following workflow:
 
 ```
 Customer Order → Production → Quality Control → Packing → Shipping → Customer Update
 ```
 
-Sistem ini menjadi **single source of truth** yang mengubah PO mentah menjadi instruksi yang jelas — baik untuk tim produksi maupun tim fulfillment di Bali — tanpa perlu klarifikasi tambahan dari founder.
+This system acts as a **single source of truth** that transforms raw POs into clear instructions — for both the production team and the fulfillment team in Bali — without requiring additional clarification from the founder.
 
-> 📌 Detail lengkap requirement bisnis & fungsional ada di [`PRD.md`](./PRD.md).
+> 📌 Full business and functional requirements are documented in [`PRD.md`](./PRD.md).
 
 ---
 
-## ✨ Fitur Utama
+## ✨ Key Features
 
-| Fitur | Deskripsi |
+| Feature | Description |
 |---|---|
-| 🔐 **Autentikasi Admin/Manager** | Login berbasis JWT untuk staf operasional |
-| 📤 **Upload Purchase Order** | Drag & drop file PDF / Excel (XLS, XLSX) / Gambar (JPEG, PNG, WEBP), maks. 10MB |
-| 🤖 **Ekstraksi Data via AI** | AI membaca dokumen/gambar PO dan mengubahnya menjadi JSON terstruktur (customer, item, qty, material, size, harga, dll) |
-| ✅ **Validasi Otomatis** | Mendeteksi info yang hilang (produk tidak dikenal, size kosong, style code tidak valid, dst.) |
-| 🛠️ **Instruksi Produksi** | Otomatis menghasilkan catatan produksi & catatan untuk artisan |
-| 📦 **Panduan Packing** | Menghasilkan checklist packing per item, lengkap dengan catatan packaging |
-| 📊 **Dashboard & Tracking** | Memantau seluruh order beserta status (Uploaded → Reviewed → Production → QC → Packing → Shipping → Completed) |
-| 🗃️ **Manajemen Order** | Edit detail order/item, update status, soft delete, archive, restore |
-| 📚 **Katalog Produk** | CRUD katalog produk (style code, nama, material, gambar, harga wholesale) untuk membantu AI mencocokkan item |
-| 🛡️ **Mode Fallback AI** | Jika API key AI tidak tersedia/gagal, sistem otomatis memakai data simulasi agar demo tetap berjalan |
+| 🔐 **Admin/Manager Authentication** | JWT-based login for operational staff |
+| 📤 **Purchase Order Upload** | Drag & drop support for PDF / Excel (XLS, XLSX) / Image (JPEG, PNG, WEBP) files, up to 10MB |
+| 🤖 **AI Data Extraction** | AI reads PO documents/images and converts them into structured JSON (customer, items, quantity, material, size, price, etc.) |
+| ✅ **Automatic Validation** | Detects missing information (unknown products, empty sizes, invalid style codes, etc.) |
+| 🛠️ **Production Instructions** | Automatically generates production notes and artisan instructions |
+| 📦 **Packing Guide** | Generates a per-item packing checklist with packaging notes |
+| 📊 **Dashboard & Tracking** | Monitors all orders and their statuses (Uploaded → Reviewed → Production → QC → Packing → Shipping → Completed) |
+| 🗃️ **Order Management** | Edit order/item details, update status, soft delete, archive, and restore |
+| 📚 **Product Catalog** | Full CRUD for the product catalog (style code, name, material, image, wholesale price) to assist AI in matching items |
+| 🛡️ **AI Fallback Mode** | If the AI API key is unavailable or fails, the system automatically uses simulated data so demos continue to work smoothly |
 
 ---
 
 ## 🧰 Tech Stack
 
 ### Backend
-| Komponen | Teknologi |
+| Component | Technology |
 |---|---|
 | Runtime | Node.js |
 | Framework | Express.js 5 |
 | ORM | Prisma ORM |
 | Database | PostgreSQL (Supabase) |
 | File Storage | Supabase Storage |
-| Autentikasi | JWT (`jsonwebtoken`) + `bcryptjs` |
+| Authentication | JWT (`jsonwebtoken`) + `bcryptjs` |
 | Upload Handler | Multer (in-memory storage) |
-| Parsing Dokumen | `pdf-parse` (PDF), `xlsx` (Excel) |
-| AI Provider | Google Gemini 2.5 Flash via **Google AI Studio** (utama) & **OpenRouter** (fallback) — menggunakan SDK `openai` dengan base URL custom |
-| PDF Generator | `pdfkit` (tersedia untuk ekspor dokumen) |
+| Document Parsing | `pdf-parse` (PDF), `xlsx` (Excel) |
+| AI Provider | Google Gemini 2.5 Flash via **Google AI Studio** (primary) & **OpenRouter** (fallback) — using the `openai` SDK with a custom base URL |
+| PDF Generator | `pdfkit` (available for document exports) |
 
 ### Frontend
-| Komponen | Teknologi |
+| Component | Technology |
 |---|---|
 | Framework | Next.js 16 (App Router) |
-| Library UI | React 19 |
+| UI Library | React 19 |
 | Styling | Tailwind CSS 4 |
 | Upload UI | `react-dropzone` |
-| Bahasa | TypeScript |
+| Language | TypeScript |
 
 ---
 
-## 🏗️ Arsitektur Sistem
+## 🏗️ System Architecture
 
-Arsitektur mengikuti pola **Monolithic Backend + External AI Service**, dipilih agar pengembangan cepat sesuai timeline hackathon.
+The architecture follows a **Monolithic Backend + External AI Service** pattern, chosen for rapid development within the hackathon timeline.
 
 <p align="center">
-  <img src="assets/architecture-diagram.svg" alt="Diagram Arsitektur Sistem" width="100%"/>
+  <img src="assets/architecture-diagram.svg" alt="System Architecture Diagram" width="100%"/>
 </p>
 
 <details>
-<summary><b>Lihat alur utama dalam bentuk teks</b></summary>
+<summary><b>View the main flow as text</b></summary>
 
 ```
 Customer → Upload PO → Frontend → Backend → AI Extraction
-   → Validasi → Simpan ke Database
+   → Validation → Save to Database
    → ┌─ Production Instruction
      └─ Packing Guide
    → Tracking Dashboard → Completed
@@ -149,58 +149,58 @@ Customer → Upload PO → Frontend → Backend → AI Extraction
 
 ```
 backend/src/
-├── auth/        → Modul autentikasi (repository, service, router)
-├── product/     → Modul katalog produk
-├── order/       → Modul order (upload, ekstraksi AI, status, production, packing)
-├── config/      → Koneksi Prisma & Supabase
+├── auth/        → Authentication module (repository, service, router)
+├── product/     → Product catalog module
+├── order/       → Order module (upload, AI extraction, status, production, packing)
+├── config/      → Prisma & Supabase connection
 ├── middleware/  → JWT auth guard, Multer upload guard
 ├── services/    → aiService, parserService, storageService, systemPrompt
-└── app.js       → Entry point Express
+└── app.js       → Express entry point
 ```
 
-Pola layering setiap modul: **Router → Service (business logic + AI) → Repository (Prisma/DB)**.
+Each module follows this layering pattern: **Router → Service (business logic + AI) → Repository (Prisma/DB)**.
 
 ### Frontend (Next.js App Router)
 
 ```
 frontend/src/
 ├── app/
-│   ├── page.tsx              → Halaman Upload PO (Home)
-│   ├── login/                → Halaman Login
-│   ├── dashboard/            → Dashboard & daftar order
-│   ├── review/[id]/          → Review hasil ekstraksi AI
-│   ├── production/[id]/      → Instruksi produksi
-│   ├── packing/[id]/         → Panduan & checklist packing
-│   └── tracking/[id]/        → Tracking status order
+│   ├── page.tsx              → PO Upload Page (Home)
+│   ├── login/                → Login Page
+│   ├── dashboard/            → Dashboard & order list
+│   ├── review/[id]/          → Review AI extraction results
+│   ├── production/[id]/      → Production instructions
+│   ├── packing/[id]/         → Packing guide & checklist
+│   └── tracking/[id]/        → Order status tracking
 └── components/
     ├── ClientWrapper.tsx
-    └── WorkflowStepper.tsx   → Stepper visual: Production → Packing, dst.
+    └── WorkflowStepper.tsx   → Visual stepper: Production → Packing, etc.
 ```
 
-> Arsitektur sistem secara menyeluruh juga dijelaskan di [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+> The full system architecture is also described in [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
 ---
 
-## 📂 Struktur Folder
+## 📂 Folder Structure
 
 <details>
-<summary><b>Klik untuk melihat struktur folder lengkap</b></summary>
+<summary><b>Click to view the full folder structure</b></summary>
 
 ```
 HeatherBenjaminJewelry/
-├── README.md                 ← (file ini)
+├── README.md                 ← (this file)
 ├── PRD.md                    ← Product Requirements Document
-├── ARCHITECTURE.md           ← Dokumen arsitektur sistem
-├── DATABASE.md               ← Dokumen desain database
-├── DESIGN.md                 ← Design system & UI guideline
-├── maua72.md                 ← Business case asli (brief hackathon)
+├── ARCHITECTURE.md           ← System architecture document
+├── DATABASE.md               ← Database design document
+├── DESIGN.md                 ← Design system & UI guidelines
+├── maua72.md                 ← Original business case (hackathon brief)
 │
 ├── backend/
-│   ├── backend.md            ← Dokumentasi teknis backend
+│   ├── backend.md            ← Backend technical documentation
 │   ├── package.json
 │   ├── prisma/
-│   │   ├── schema.prisma     ← Skema database (Prisma)
-│   │   └── migrations/       ← Riwayat migrasi database
+│   │   ├── schema.prisma     ← Database schema (Prisma)
+│   │   └── migrations/       ← Database migration history
 │   └── src/
 │       ├── app.js
 │       ├── auth/
@@ -211,28 +211,28 @@ HeatherBenjaminJewelry/
 │       └── services/
 │
 ├── frontend/
-│   ├── README.md             ← README bawaan Next.js
-│   ├── AGENTS.md / CLAUDE.md ← Instruksi internal untuk AI coding agent
+│   ├── README.md             ← Default Next.js README
+│   ├── AGENTS.md / CLAUDE.md ← Internal instructions for AI coding agents
 │   ├── package.json
-│   ├── next.config.ts        ← Konfigurasi rewrite proxy ke backend
+│   ├── next.config.ts        ← Proxy rewrite configuration to backend
 │   └── src/
 │       ├── app/
 │       └── components/
 │
 ├── data/
-│   └── data.md                ← (placeholder dataset/katalog produk)
+│   └── data.md                ← (placeholder for dataset/product catalog)
 │
 └── docs/
-    └── docs.md                ← (placeholder dokumentasi tambahan)
+    └── docs.md                ← (placeholder for additional documentation)
 ```
 
 </details>
 
 ---
 
-## 🗄️ Skema Database
+## 🗄️ Database Schema
 
-Database menggunakan **PostgreSQL** (di-hosting via **Supabase**) dengan **Prisma ORM**. Skema aktual (`backend/prisma/schema.prisma`) terdiri dari 7 tabel:
+The database uses **PostgreSQL** (hosted via **Supabase**) with **Prisma ORM**. The actual schema (`backend/prisma/schema.prisma`) consists of 7 tables:
 
 ### Entity Relationship Diagram
 
@@ -241,7 +241,7 @@ Database menggunakan **PostgreSQL** (di-hosting via **Supabase**) dengan **Prism
 </p>
 
 <details>
-<summary><b>Lihat relasi dalam bentuk teks</b></summary>
+<summary><b>View relationships as text</b></summary>
 
 ```
 users
@@ -255,251 +255,251 @@ orders 1──N tracking
 </details>
 
 <details>
-<summary><b>📋 Detail kolom setiap tabel (klik untuk buka)</b></summary>
+<summary><b>📋 Column details for each table (click to expand)</b></summary>
 
-### Tabel `users`
-| Kolom | Tipe | Keterangan |
+### Table `users`
+| Column | Type | Description |
 |---|---|---|
 | id | UUID (PK) | |
 | email | VARCHAR (unique) | |
-| password_hash | VARCHAR | di-hash dengan bcrypt |
+| password_hash | VARCHAR | Hashed with bcrypt |
 | name | VARCHAR | |
-| role | VARCHAR | default `manager` |
+| role | VARCHAR | Default `manager` |
 | created_at | TIMESTAMP | |
 
-### Tabel `orders`
-| Kolom | Tipe | Keterangan |
+### Table `orders`
+| Column | Type | Description |
 |---|---|---|
 | id | UUID (PK) | |
 | po_number | VARCHAR (unique) | |
 | customer_name | VARCHAR | |
-| customer_email | VARCHAR | nullable |
-| upload_file | TEXT | URL publik Supabase Storage |
+| customer_email | VARCHAR | Nullable |
+| upload_file | TEXT | Supabase Storage public URL |
 | notes | TEXT | |
-| status | VARCHAR | default `Uploaded` |
-| is_deleted | BOOLEAN | soft delete |
-| is_archived | BOOLEAN | arsip |
+| status | VARCHAR | Default `Uploaded` |
+| is_deleted | BOOLEAN | Soft delete flag |
+| is_archived | BOOLEAN | Archive flag |
 | created_at | TIMESTAMP | |
 
-### Tabel `order_items`
-| Kolom | Tipe | Keterangan |
+### Table `order_items`
+| Column | Type | Description |
 |---|---|---|
 | id | UUID (PK) | |
 | order_id | UUID (FK → orders, cascade) | |
-| product_id | UUID (FK → products, set null) | nullable jika produk tak dikenali |
-| style_code | VARCHAR | nullable |
-| product_name | VARCHAR | nullable |
-| unit_price | DECIMAL(12,2) | default 0 |
+| product_id | UUID (FK → products, set null) | Nullable if product is unrecognized |
+| style_code | VARCHAR | Nullable |
+| product_name | VARCHAR | Nullable |
+| unit_price | DECIMAL(12,2) | Default 0 |
 | quantity | INTEGER | |
-| size | VARCHAR | nullable |
-| material | VARCHAR | nullable |
-| special_request | TEXT | nullable |
+| size | VARCHAR | Nullable |
+| material | VARCHAR | Nullable |
+| special_request | TEXT | Nullable |
 
-### Tabel `products`
-| Kolom | Tipe | Keterangan |
+### Table `products`
+| Column | Type | Description |
 |---|---|---|
 | id | UUID (PK) | |
 | style_code | VARCHAR (unique) | |
 | product_name | VARCHAR | |
-| description | TEXT | nullable |
-| material | VARCHAR | nullable |
-| image_url | TEXT | nullable |
-| wholesale_price | DECIMAL(12,2) | default 0 |
+| description | TEXT | Nullable |
+| material | VARCHAR | Nullable |
+| image_url | TEXT | Nullable |
+| wholesale_price | DECIMAL(12,2) | Default 0 |
 
-### Tabel `production`
-| Kolom | Tipe | Keterangan |
+### Table `production`
+| Column | Type | Description |
 |---|---|---|
 | id | UUID (PK) | |
 | order_id | UUID (FK → orders, cascade) | |
-| production_note | TEXT | dihasilkan AI |
-| artisan_note | TEXT | dihasilkan AI |
-| generated_by_ai | BOOLEAN | default true |
+| production_note | TEXT | AI-generated |
+| artisan_note | TEXT | AI-generated |
+| generated_by_ai | BOOLEAN | Default true |
 | created_at | TIMESTAMP | |
 
-### Tabel `packing`
-| Kolom | Tipe | Keterangan |
+### Table `packing`
+| Column | Type | Description |
 |---|---|---|
 | id | UUID (PK) | |
 | order_id | UUID (FK → orders, cascade) | |
-| packing_note | TEXT | dihasilkan AI |
-| checklist | JSON | default `[]` |
-| generated_by_ai | BOOLEAN | default true |
+| packing_note | TEXT | AI-generated |
+| checklist | JSON | Default `[]` |
+| generated_by_ai | BOOLEAN | Default true |
 | created_at | TIMESTAMP | |
 
-### Tabel `tracking`
-| Kolom | Tipe | Keterangan |
+### Table `tracking`
+| Column | Type | Description |
 |---|---|---|
 | id | UUID (PK) | |
 | order_id | UUID (FK → orders, cascade) | |
-| status | VARCHAR | salah satu dari status workflow |
+| status | VARCHAR | One of the workflow statuses |
 | updated_at | TIMESTAMP | |
 
 </details>
 
-> Tabel tambahan untuk pengembangan lanjutan (`inventory`, `suppliers`, `invoices`, `notifications`, `audit_logs`, `ai_prompt_history`) sengaja **belum** dibuat di MVP ini agar prototipe tetap ringan.
+> Additional tables for future development (`inventory`, `suppliers`, `invoices`, `notifications`, `audit_logs`, `ai_prompt_history`) are intentionally **excluded** from this MVP to keep the prototype lightweight.
 
 ---
 
-## 🤖 Alur Kerja AI
+## 🤖 AI Workflow
 
-File kunci: `backend/src/services/aiService.js`, `parserService.js`, `systemPrompt.js`.
+Key files: `backend/src/services/aiService.js`, `parserService.js`, `systemPrompt.js`.
 
 <p align="center">
-  <img src="assets/ai-workflow-diagram.svg" alt="Diagram Alur Kerja AI" width="100%"/>
+  <img src="assets/ai-workflow-diagram.svg" alt="AI Workflow Diagram" width="100%"/>
 </p>
 
 <details>
-<summary><b>Lihat alur AI dalam bentuk teks</b></summary>
+<summary><b>View the AI flow as text</b></summary>
 
 ```
-Upload File (PDF/Excel/Gambar)
+Upload File (PDF/Excel/Image)
         │
         ▼
-parserService → ekstrak teks (PDF/Excel) ATAU encode base64 (gambar)
+parserService → extract text (PDF/Excel) OR encode base64 (image)
         │
         ▼
-systemPrompt.js → bangun system prompt + daftar katalog produk saat ini
+systemPrompt.js → build system prompt + current product catalog list
         │
         ▼
-aiService → kirim ke AI dengan structured JSON Schema
+aiService → send to AI with structured JSON Schema
         │
    ┌────┴────┐
    ▼         ▼
-Gemini 2.5  OpenRouter (fallback jika Gemini gagal/limit)
+Gemini 2.5  OpenRouter (fallback if Gemini fails/rate-limited)
 Flash       (model: google/gemini-2.5-flash)
    │
    ▼
-Parse respons JSON (po_number, customer, products[], order_summary,
-production_notes, packing_guide, missing_info, flags, validation, dst.)
+Parse JSON response (po_number, customer, products[], order_summary,
+production_notes, packing_guide, missing_info, flags, validation, etc.)
    │
    ▼
-Simpan ke database (orders, order_items, production, packing, tracking)
+Save to database (orders, order_items, production, packing, tracking)
 ```
 
 </details>
 
-**Output terstruktur AI mencakup:**
-- Data PO: `po_number`, `order_date`, `ship_date`, `payment_terms`, info `customer`
-- Daftar `products` (style code, nama, material, finish, size, harga satuan, qty, subtotal, catatan khusus)
-- `order_summary` (total SKU, total unit, total order, mata uang, metode pengiriman)
-- `production_notes` (item urgent, item gift, item fragile, custom request)
-- `packing_guide` (checklist item, label karton, metode pengiriman, perlu tracking atau tidak)
-- `missing_info` & `flags` → dasar validasi otomatis
-- `validation` → pengecekan kecocokan subtotal/total/style code
+**Structured AI output includes:**
+- PO data: `po_number`, `order_date`, `ship_date`, `payment_terms`, `customer` info
+- `products` list (style code, name, material, finish, size, unit price, quantity, subtotal, special notes)
+- `order_summary` (total SKUs, total units, total order value, currency, shipping method)
+- `production_notes` (urgent items, gift items, fragile items, custom requests)
+- `packing_guide` (item checklist, carton labels, shipping method, whether tracking is required)
+- `missing_info` & `flags` → basis for automatic validation
+- `validation` → subtotal/total/style code matching checks
 
-**Mekanisme retry:** jika terjadi rate limit (HTTP 429), sistem otomatis retry dengan backoff (5s, lalu 10s) sebelum pindah ke provider AI berikutnya.
+**Retry mechanism:** if a rate limit (HTTP 429) is encountered, the system automatically retries with backoff (5s, then 10s) before switching to the next AI provider.
 
-### 🛟 Mode Fallback (tanpa AI)
-Jika **tidak ada** API key AI yang dikonfigurasi, **atau** semua percobaan ke AI gagal, sistem **tidak akan crash**. Backend otomatis menghasilkan data simulasi (mock) berbasis katalog produk yang ada di database, lengkap dengan peringatan `"⚠️ This is FALLBACK data..."` pada `validation_warnings` — agar demo tetap bisa berjalan mulus.
+### 🛟 Fallback Mode (without AI)
+If **no** AI API key is configured, **or** all AI attempts fail, the system **will not crash**. The backend automatically generates mock data based on the product catalog in the database, including a `"⚠️ This is FALLBACK data..."` warning in `validation_warnings` — ensuring demos can still run smoothly.
 
 ---
 
-## 🚀 Instalasi & Menjalankan Project
+## 🚀 Installation & Running the Project
 
-### Prasyarat
-- Node.js (disarankan versi LTS terbaru)
-- Akun & Project [Supabase](https://supabase.com) (PostgreSQL + Storage)
-- API Key AI: [Google AI Studio (Gemini)](https://aistudio.google.com) dan/atau [OpenRouter](https://openrouter.ai)
+### Prerequisites
+- Node.js (latest LTS version recommended)
+- A [Supabase](https://supabase.com) account and project (PostgreSQL + Storage)
+- AI API Key: [Google AI Studio (Gemini)](https://aistudio.google.com) and/or [OpenRouter](https://openrouter.ai)
 
-### 1. Clone Repository
+### 1. Clone the Repository
 ```bash
 git clone <repo-url>
-cd MatchaTim_HeatherBenjaminJewelry
+cd HeatherBenjaminJewelry
 ```
 
-### 2. Setup Backend
+### 2. Set Up the Backend
 ```bash
 cd backend
 npm install
 ```
 
-Buat file `.env` di folder `backend/` (lihat [Environment Variables](#-environment-variables)).
+Create a `.env` file in the `backend/` folder (see [Environment Variables](#-environment-variables)).
 
-Generate Prisma client & push schema ke database Supabase:
+Generate the Prisma client and push the schema to your Supabase database:
 ```bash
 npx prisma generate
 npx prisma db push
 ```
 
-Jalankan server (dev mode dengan hot-reload):
+Start the server (dev mode with hot-reload):
 ```bash
 npm run dev
 ```
-Backend berjalan di `http://localhost:5000`.
+The backend will run at `http://localhost:5000`.
 
-> 💡 Pastikan sudah membuat **bucket Storage** bernama `purchase-orders` di Supabase Storage agar upload file PO berhasil disimpan.
+> 💡 Make sure you have created a **Storage bucket** named `purchase-orders` in Supabase Storage so PO file uploads are saved successfully.
 
-### 3. Setup Frontend
+### 3. Set Up the Frontend
 ```bash
 cd frontend
 npm install
 ```
 
-Buat file `.env.local` (opsional, jika backend tidak di `localhost:5000`):
+Create a `.env.local` file (optional, only if the backend is not running at `localhost:5000`):
 ```env
 BACKEND_API_URL=http://127.0.0.1:5000
 ```
 
-Jalankan dev server:
+Start the dev server:
 ```bash
 npm run dev
 ```
-Frontend berjalan di `http://localhost:3000`. Semua request `/api/*` dan `/data/images/*` otomatis diteruskan (rewrite proxy) ke backend sesuai `next.config.ts`.
+The frontend will run at `http://localhost:3000`. All `/api/*` and `/data/images/*` requests are automatically proxied to the backend via `next.config.ts`.
 
-### 4. Buat User Admin/Manager Pertama
-Karena belum ada UI registrasi, gunakan endpoint API langsung (lihat [Dokumentasi API](#-dokumentasi-api)):
+### 4. Create the First Admin/Manager User
+Since there is no registration UI yet, use the API endpoint directly (see [API Documentation](#-api-documentation)):
 ```bash
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"manager@heatherbenjamin.com","password":"securepassword123","name":"Operations Manager","role":"manager"}'
 ```
-Lalu login lewat halaman `/login` di frontend.
+Then log in via the `/login` page on the frontend.
 
 ---
 
 ## 🔑 Environment Variables
 
 ### Backend (`backend/.env`)
-| Variable | Wajib | Keterangan |
+| Variable | Required | Description |
 |---|---|---|
-| `PORT` | Opsional | Default `5000` |
-| `DATABASE_URL` | ✅ | Connection string Postgres Supabase (pooler, untuk Prisma Client runtime) |
-| `DIRECT_URL` | ✅ | Connection string langsung Postgres Supabase (untuk migrasi Prisma) |
-| `SUPABASE_URL` | ✅ | URL project Supabase |
-| `SUPABASE_KEY` | ✅ | Service role key atau anon key Supabase |
-| `JWT_SECRET` | ✅ | Secret untuk signing JWT (login) |
-| `GEMINI_API_KEY` | Opsional* | API key Google AI Studio (Gemini) — provider AI utama |
-| `OPENROUTER_API_KEY` | Opsional* | API key OpenRouter — provider AI fallback |
-| `FRONTEND_URL` | Opsional | Untuk konfigurasi CORS origin tambahan selain `localhost:3000` |
+| `PORT` | Optional | Default `5000` |
+| `DATABASE_URL` | ✅ | Supabase Postgres connection string (pooler, for Prisma Client runtime) |
+| `DIRECT_URL` | ✅ | Direct Supabase Postgres connection string (for Prisma migrations) |
+| `SUPABASE_URL` | ✅ | Supabase project URL |
+| `SUPABASE_KEY` | ✅ | Supabase service role key or anon key |
+| `JWT_SECRET` | ✅ | Secret for signing JWTs (login) |
+| `GEMINI_API_KEY` | Optional* | Google AI Studio (Gemini) API key — primary AI provider |
+| `OPENROUTER_API_KEY` | Optional* | OpenRouter API key — fallback AI provider |
+| `FRONTEND_URL` | Optional | For additional CORS origin configuration beyond `localhost:3000` |
 
-\* Jika **kedua** key AI tidak diisi, sistem otomatis berjalan dalam [mode fallback](#-mode-fallback-tanpa-ai).
+\* If **both** AI keys are not set, the system automatically runs in [fallback mode](#-fallback-mode-without-ai).
 
 ### Frontend (`frontend/.env.local`)
-| Variable | Wajib | Keterangan |
+| Variable | Required | Description |
 |---|---|---|
-| `BACKEND_API_URL` | Opsional | Default `http://127.0.0.1:5000`, dipakai oleh rewrite proxy Next.js |
+| `BACKEND_API_URL` | Optional | Default `http://127.0.0.1:5000`, used by the Next.js rewrite proxy |
 
 ---
 
-## 📡 Dokumentasi API
+## 📡 API Documentation
 
-Base URL backend: `http://localhost:5000/api` (atau diakses lewat proxy frontend di `/api`).
+Backend base URL: `http://localhost:5000/api` (or accessed via the frontend proxy at `/api`).
 
 ### Health Check
-| Method | Route | Keterangan |
+| Method | Route | Description |
 |---|---|---|
-| `GET` | `/api` | Status API |
-| `GET` | `/api/db-check` | Cek koneksi database via Prisma |
+| `GET` | `/api` | API status |
+| `GET` | `/api/db-check` | Check database connection via Prisma |
 
-### 🔐 Autentikasi (`/api/auth`)
+### 🔐 Authentication (`/api/auth`)
 
-| Method | Route | Keterangan |
+| Method | Route | Description |
 |---|---|---|
-| `POST` | `/api/auth/register` | Daftarkan user admin/manager baru |
-| `POST` | `/api/auth/login` | Login, mengembalikan JWT token |
+| `POST` | `/api/auth/register` | Register a new admin/manager user |
+| `POST` | `/api/auth/login` | Log in and receive a JWT token |
 
 <details>
-<summary><b>Contoh request &amp; response</b></summary>
+<summary><b>Example request &amp; response</b></summary>
 
 **Register**
 ```http
@@ -540,19 +540,19 @@ Response:
 
 </details>
 
-> Semua endpoint di bawah ini **wajib** header `Authorization: Bearer <JWT_TOKEN>`.
+> All endpoints below **require** the `Authorization: Bearer <JWT_TOKEN>` header.
 
-### 📚 Katalog Produk (`/api/products`)
+### 📚 Product Catalog (`/api/products`)
 
-| Method | Route | Keterangan |
+| Method | Route | Description |
 |---|---|---|
-| `GET` | `/api/products` | Ambil semua produk |
-| `POST` | `/api/products` | Tambah produk baru |
+| `GET` | `/api/products` | Retrieve all products |
+| `POST` | `/api/products` | Add a new product |
 
 <details>
-<summary><b>Contoh body request</b></summary>
+<summary><b>Example request body</b></summary>
 
-Body `POST /api/products`:
+Body for `POST /api/products`:
 ```json
 {
   "style_code": "HB102",
@@ -568,28 +568,28 @@ Body `POST /api/products`:
 
 ### 📦 Purchase Order / Order (`/api/orders`)
 
-| Method | Route | Keterangan |
+| Method | Route | Description |
 |---|---|---|
-| `POST` | `/api/orders/upload` | Upload file PO → diproses AI → disimpan |
-| `GET` | `/api/orders` | Ambil semua order (mendukung query filter) |
-| `GET` | `/api/orders/:id` | Detail order lengkap (item, production, packing, tracking) |
-| `PUT` | `/api/orders/:id` | Update detail order & item |
-| `PUT` | `/api/orders/:id/status` | Update status order |
-| `PUT` | `/api/orders/:id/production` | Update catatan produksi & artisan |
-| `PUT` | `/api/orders/:id/packing` | Update catatan & checklist packing |
-| `PUT` | `/api/orders/:id/archive` | Arsipkan order |
-| `PUT` | `/api/orders/:id/restore` | Pulihkan order dari arsip |
-| `DELETE` | `/api/orders/:id` | Soft delete order |
+| `POST` | `/api/orders/upload` | Upload a PO file → processed by AI → saved |
+| `GET` | `/api/orders` | Retrieve all orders (supports query filters) |
+| `GET` | `/api/orders/:id` | Full order details (items, production, packing, tracking) |
+| `PUT` | `/api/orders/:id` | Update order & item details |
+| `PUT` | `/api/orders/:id/status` | Update order status |
+| `PUT` | `/api/orders/:id/production` | Update production notes & artisan notes |
+| `PUT` | `/api/orders/:id/packing` | Update packing notes & checklist |
+| `PUT` | `/api/orders/:id/archive` | Archive an order |
+| `PUT` | `/api/orders/:id/restore` | Restore an archived order |
+| `DELETE` | `/api/orders/:id` | Soft delete an order |
 
 <details>
-<summary><b>Contoh request &amp; response</b></summary>
+<summary><b>Example request &amp; response</b></summary>
 
 **Upload PO**
 ```http
 POST /api/orders/upload
 Content-Type: multipart/form-data
 
-file: <PDF | XLS | XLSX | JPEG | PNG | WEBP, maks. 10MB>
+file: <PDF | XLS | XLSX | JPEG | PNG | WEBP, max 10MB>
 ```
 Response:
 ```json
@@ -609,7 +609,7 @@ Response:
 }
 ```
 
-**Query filter `GET /api/orders`:**
+**Query filters for `GET /api/orders`:**
 `search`, `status`, `date`, `customer`, `sortBy`, `isArchived`, `isDeleted`
 
 **Update Status**
@@ -619,135 +619,135 @@ Content-Type: application/json
 
 { "status": "Production" }
 ```
-Nilai valid: `Uploaded`, `Reviewed`, `Production`, `QC`, `Packing`, `Shipping`, `Completed`.
+Valid values: `Uploaded`, `Reviewed`, `Production`, `QC`, `Packing`, `Shipping`, `Completed`.
 
 </details>
 
-> 📌 Dokumentasi teknis backend lengkap (instalasi, endpoint, contoh response): [`backend/backend.md`](./backend/backend.md)
+> 📌 Full backend technical documentation (setup, endpoints, example responses): [`backend/backend.md`](./backend/backend.md)
 
 ---
 
-## 🖥️ Halaman & Routing Frontend
+## 🖥️ Frontend Pages & Routing
 
-| Route | Halaman | Keterangan |
+| Route | Page | Description |
 |---|---|---|
-| `/` | Upload PO | Halaman utama, drag & drop upload file PO |
-| `/login` | Login | Login admin/manager |
-| `/dashboard` | Dashboard | Daftar & monitoring semua order |
-| `/review/[id]` | Review Order | Review & koreksi hasil ekstraksi AI sebelum disimpan final |
-| `/production/[id]` | Instruksi Produksi | Lihat/edit catatan produksi & artisan per order |
-| `/packing/[id]` | Panduan Packing | Lihat/edit catatan packing & checklist item |
-| `/tracking/[id]` | Tracking | Pantau status & histori progres order |
+| `/` | Upload PO | Home page with drag & drop PO file upload |
+| `/login` | Login | Admin/manager login |
+| `/dashboard` | Dashboard | List and monitor all orders |
+| `/review/[id]` | Review Order | Review & correct AI extraction results before final save |
+| `/production/[id]` | Production Instructions | View/edit production notes & artisan instructions per order |
+| `/packing/[id]` | Packing Guide | View/edit packing notes & item checklist |
+| `/tracking/[id]` | Tracking | Monitor order status & progress history |
 
-Komponen `WorkflowStepper` menampilkan progres visual antar tahap (Production → Packing, dst.) di setiap halaman terkait.
+The `WorkflowStepper` component displays a visual progress indicator across stages (Production → Packing, etc.) on each relevant page.
 
 ---
 
-## 🔄 Status & Workflow Order
+## 🔄 Order Status & Workflow
 
 ```
 Uploaded → Reviewed → Production → QC → Packing → Shipping → Completed
 ```
 
-| Status | Arti |
+| Status | Meaning |
 |---|---|
-| `Uploaded` | File PO baru diupload & diekstrak AI |
-| `Reviewed` | Data sudah dicek/divalidasi staf operasional |
-| `Production` | Sedang dikerjakan artisan/produksi |
+| `Uploaded` | PO file has just been uploaded & extracted by AI |
+| `Reviewed` | Data has been checked/validated by operational staff |
+| `Production` | Being worked on by artisans/production team |
 | `QC` | Quality Control |
-| `Packing` | Proses pengepakan |
-| `Shipping` | Dalam pengiriman |
-| `Completed` | Order selesai |
+| `Packing` | Packing in progress |
+| `Shipping` | In transit |
+| `Completed` | Order fulfilled |
 
-Selain status di atas, order juga punya flag tambahan: **`is_archived`** (diarsipkan) dan **`is_deleted`** (soft delete, tidak benar-benar dihapus dari database).
+In addition to the statuses above, orders also carry two extra flags: **`is_archived`** (archived) and **`is_deleted`** (soft delete — the record is not actually removed from the database).
 
 ---
 
 ## 🎨 Design System
 
-Brand positioning: **"a luxury jewelry boutique with timeless elegance"** — bukan marketplace atau template admin biasa.
+Brand positioning: **"a luxury jewelry boutique with timeless elegance"** — not a marketplace or a generic admin template.
 
-| Token | Nilai |
+| Token | Value |
 |---|---|
 | Primary — Luxury Gold | `#C6A55A` |
 | Secondary — Ivory White | `#FAF8F4` |
 | Accent — Champagne | `#E8D9B5` |
 | Dark — Charcoal Black | `#1E1E1E` |
 | Neutral — Warm Gray | `#7A7A7A` |
-| Font Heading | Playfair Display (fallback Georgia) |
-| Font Body | Inter (fallback sans-serif) |
+| Heading Font | Playfair Display (fallback: Georgia) |
+| Body Font | Inter (fallback: sans-serif) |
 | Border Radius | Button 12px · Card 18px · Modal 24px |
 
-Mendukung **Light Mode** & **Dark Mode** dengan token warna terpisah, transisi halus (`transition-colors duration-300`), dan toggle ikon Sun/Moon di navbar.
+Supports **Light Mode** & **Dark Mode** with separate color tokens, smooth transitions (`transition-colors duration-300`), and a Sun/Moon icon toggle in the navbar.
 
-> 📌 Detail lengkap (typography scale, layout, animasi, aturan komponen, aksesibilitas): [`DESIGN.md`](./DESIGN.md)
-
----
-
-## 🔒 Keamanan
-
-- Password di-hash menggunakan **bcryptjs** sebelum disimpan.
-- Autentikasi berbasis **JWT**, divalidasi lewat middleware (`middleware/auth.js`) di setiap endpoint privat.
-- Upload file dibatasi tipe (`PDF`, `XLS/XLSX`, `JPEG/PNG/WEBP`) dan ukuran maksimal **10MB** (Multer file filter).
-- **CORS** dibatasi hanya untuk origin yang terdaftar (`localhost:3000` & `FRONTEND_URL`).
-- API key (Supabase, AI provider, JWT secret) disimpan di **environment variables**, tidak di-hardcode.
-- Informasi sensitif customer diusahakan diminimalkan sesuai prinsip pada [`PRD.md`](./PRD.md) & [`ARCHITECTURE.md`](./ARCHITECTURE.md).
-- Order tidak benar-benar dihapus permanen — menggunakan **soft delete** (`is_deleted`) demi audit trail.
-
-> ⚠️ Untuk produksi nyata, disarankan menambahkan: rate limiting, validasi/sanitasi input lebih ketat, rotasi secret, HTTPS wajib, serta audit log.
+> 📌 Full details (typography scale, layout, animations, component rules, accessibility): [`DESIGN.md`](./DESIGN.md)
 
 ---
 
-## 🗺️ Roadmap / Future Enhancement
+## 🔒 Security
 
-Di luar scope MVP saat ini, namun direncanakan untuk pengembangan lanjutan:
+- Passwords are hashed using **bcryptjs** before being stored.
+- **JWT**-based authentication, validated via middleware (`middleware/auth.js`) on every private endpoint.
+- File uploads are restricted by type (`PDF`, `XLS/XLSX`, `JPEG/PNG/WEBP`) and a maximum size of **10MB** (Multer file filter).
+- **CORS** is restricted to registered origins only (`localhost:3000` & `FRONTEND_URL`).
+- API keys (Supabase, AI provider, JWT secret) are stored in **environment variables** and never hardcoded.
+- Sensitive customer information is minimized in accordance with the principles outlined in [`PRD.md`](./PRD.md) & [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+- Orders are never permanently deleted — **soft delete** (`is_deleted`) is used to maintain an audit trail.
 
-- Integrasi **Shopify**
-- Integrasi **QuickBooks**
+> ⚠️ For a real production environment, it is strongly recommended to add: rate limiting, stricter input validation/sanitization, secret rotation, enforced HTTPS, and audit logging.
+
+---
+
+## 🗺️ Roadmap / Future Enhancements
+
+Beyond the current MVP scope, planned for future development:
+
+- **Shopify** integration
+- **QuickBooks** integration
 - **Inventory Management**
-- Notifikasi **WhatsApp** & **Email**
+- **WhatsApp** & **Email** notifications
 - **Analytics Dashboard**
-- **Role-Based Access Control (RBAC)** lebih granular
+- More granular **Role-Based Access Control (RBAC)**
 - **Supplier Management**
-- Tabel tambahan: `inventory`, `suppliers`, `invoices`, `notifications`, `audit_logs`, `ai_prompt_history`
+- Additional tables: `inventory`, `suppliers`, `invoices`, `notifications`, `audit_logs`, `ai_prompt_history`
 
 ---
 
-## 📄 Dokumen Terkait
+## 📄 Related Documents
 
-| Dokumen | Isi |
+| Document | Contents |
 |---|---|
-| [`PRD.md`](./PRD.md) | Product Requirements Document — kebutuhan bisnis & fungsional |
-| [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Arsitektur sistem secara menyeluruh |
-| [`DATABASE.md`](./DATABASE.md) | Desain database |
-| [`DESIGN.md`](./DESIGN.md) | Design system & UI/UX guideline |
-| [`maua72.md`](./maua72.md) | Business case asli dari panitia/hackathon |
-| [`backend/backend.md`](./backend/backend.md) | Dokumentasi teknis backend (setup, API, fallback mode) |
-| [`frontend/README.md`](./frontend/README.md) | README bawaan Next.js (create-next-app) |
+| [`PRD.md`](./PRD.md) | Product Requirements Document — business & functional requirements |
+| [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Comprehensive system architecture |
+| [`DATABASE.md`](./DATABASE.md) | Database design |
+| [`DESIGN.md`](./DESIGN.md) | Design system & UI/UX guidelines |
+| [`maua72.md`](./maua72.md) | Original business case from the hackathon organizers |
+| [`backend/backend.md`](./backend/backend.md) | Backend technical documentation (setup, API, fallback mode) |
+| [`frontend/README.md`](./frontend/README.md) | Default Next.js README (create-next-app) |
 
 ---
 
-## 👥 Tim & Pembagian Peran
+## 👥 Team & Roles
 
-Sesuai struktur tim pada [`PRD.md`](./PRD.md):
+As defined in the team structure in [`PRD.md`](./PRD.md):
 
-| Peran | Tanggung Jawab |
+| Role | Responsibilities |
 |---|---|
-| **Backend** | Database, REST API, integrasi AI, deployment |
-| **Frontend + UI/UX** | Dashboard, halaman upload, tracking, produksi, packing |
-| **Data Engineer** | Katalog produk, style code, gambar, mapping material, sample PO |
-| **AI Engineer** | Prompt engineering, ekstraksi dokumen, validasi, generator produksi & packing |
+| **Backend** | Database, REST API, AI integration, deployment |
+| **Frontend + UI/UX** | Dashboard, upload page, tracking, production, packing |
+| **Data Engineer** | Product catalog, style codes, images, material mapping, sample POs |
+| **AI Engineer** | Prompt engineering, document extraction, validation, production & packing generators |
 | **QA & Support** | API testing, integration testing, bug reporting |
-| **PM + Documentation** | Requirement gathering, sprint planning, dokumentasi, presentasi, demo video |
+| **PM + Documentation** | Requirement gathering, sprint planning, documentation, presentations, demo video |
 
 ---
 
-## 📜 Lisensi
+## 📜 License
 
 © 2026 **Heather Benjamin Jewelry**. All Rights Reserved.
 
-Project ini merupakan prototipe **proprietary** yang dikembangkan untuk keperluan internal Heather Benjamin Jewelry (hasil hackathon/lomba). Source code, dokumentasi, dan aset di dalamnya tidak untuk disalin, dimodifikasi, atau didistribusikan ulang oleh pihak luar tanpa izin tertulis dari pemilik project.
+This project is a **proprietary** prototype developed for internal use by Heather Benjamin Jewelry (as a hackathon/competition entry). The source code, documentation, and assets contained herein may not be copied, modified, or redistributed by any third party without the written permission of the project owner.
 
 ---
 
-<p align="center">Dibangun dengan 💛 untuk <strong>Heather Benjamin Jewelry</strong> — mengubah cara Purchase Order diproses, dari manual menjadi otomatis dengan AI.</p>
+<p align="center">Built with 💛 for <strong>Heather Benjamin Jewelry</strong> — transforming the way Purchase Orders are processed, from manual to automated with AI.</p>
