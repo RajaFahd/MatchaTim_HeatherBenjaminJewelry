@@ -1,0 +1,16 @@
+customer_code,customer_name,country,city,customer_type,preferred_shipping,special_note
+CUS001,Maison Lumière Jewelry,France,Paris,Boutique,DHL,Requires French customs invoice attached to every shipment
+CUS002,Sterling & Stone Co.,USA,New York,Retailer,FedEx,All packages must include itemized packing list per store policy
+CUS003,Auric Collective,Australia,Sydney,Distributor,DHL,Consolidate monthly orders into single shipment when possible
+CUS004,The Pearl District Boutique,USA,Portland,Boutique,UPS,Include handwritten thank you card with every order
+CUS005,Barnsworth Fine Jewels,United Kingdom,London,Retailer,DHL,Shipments must clear UK customs with HS code declared accurately
+CUS006,Norden Atelier,Germany,Berlin,Boutique,DHL,All labels must include German return address for customs compliance
+CUS007,Sakura Adornments,Japan,Tokyo,Retailer,FedEx,Include Japanese product description insert for retail floor display
+CUS008,Meridian Gems,Canada,Toronto,Distributor,FedEx,Split orders exceeding 50 units into two separate shipment boxes
+CUS009,Indigo & Ivory Boutique,USA,Los Angeles,Boutique,UPS,Fragile items must be double-boxed before handoff to courier
+CUS010,Archipelago Fine Jewelry,Singapore,Singapore,Distributor,DHL,All shipments require Certificate of Origin for import clearance
+CUS011,Crestwood Jewelry House,Canada,Vancouver,Retailer,UPS,Request signature confirmation on all deliveries above 500 USD
+CUS012,Luminary Adornments,Australia,Melbourne,Boutique,FedEx,Prefer eco-friendly outer packaging materials whenever available
+CUS013,Gilded Sparrow Boutique,USA,Chicago,Boutique,UPS,Gift wrapping required for all items marked as boutique display stock
+CUS014,Fable & Finch Jewelers,United Kingdom,Manchester,Retailer,FedEx,Include product care card in English inside every jewelry box
+CUS015,Orient Pearl Trading,Singapore,Singapore,Distributor,DHL,Bulk orders must include master carton with individual item barcodes

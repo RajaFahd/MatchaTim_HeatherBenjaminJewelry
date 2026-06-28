@@ -1,0 +1,21 @@
+packing_rule_code,style_code,packaging,protective_material,gift_box,fragile,packing_note
+PKG001,HB001,Jewelry Box,Anti Tarnish Paper,FALSE,FALSE,Wrap chain loosely to prevent tangling before placing in box
+PKG002,HB002,Jewelry Box,Anti Tarnish Paper,TRUE,FALSE,Place ring on foam insert slot to maintain shape during transit
+PKG003,HB003,Cotton Pouch,Silica Gel,FALSE,FALSE,Insert silica gel packet to protect brass from humidity and tarnish
+PKG004,HB004,Jewelry Box,Foam Insert,TRUE,TRUE,Secure moonstone pendant in foam cavity to prevent stone impact
+PKG005,HB005,Jewelry Box,Foam Insert,FALSE,TRUE,Position drop earrings upright in foam slots to protect ear wires
+PKG006,HB006,Cotton Pouch,Anti Tarnish Paper,FALSE,FALSE,Fold anklet gently and wrap in anti tarnish paper before pouching
+PKG007,HB007,Jewelry Box,Foam Insert,TRUE,TRUE,Lay brooch flat on foam insert pin back facing up avoid pressure
+PKG008,HB008,Linen Box,Foam Insert,TRUE,TRUE,Arrange all three pieces in individual foam slots within linen box
+PKG009,HB009,Cotton Pouch,Silica Gel,FALSE,TRUE,Wrap turquoise pendant individually in tissue before inserting pouch
+PKG010,HB010,Jewelry Box,Anti Tarnish Paper,TRUE,FALSE,Layer anti tarnish paper between chain segments to prevent scratching
+PKG011,HB011,Jewelry Box,Foam Insert,TRUE,FALSE,Set ring on foam insert slot verify onyx stone faces upward securely
+PKG012,HB012,Jewelry Box,Foam Insert,TRUE,TRUE,Place bracelet flat on foam insert ensure all garnets are secured
+PKG013,HB013,Jewelry Box,Foam Insert,TRUE,TRUE,Insert earrings in foam slots stone face up protect labradorite surface
+PKG014,HB014,Jewelry Box,Bubble Wrap,TRUE,TRUE,Wrap pendant in bubble wrap layer before placing in gift jewelry box
+PKG015,HB015,Linen Box,Anti Tarnish Paper,TRUE,FALSE,Coil pearl necklace gently on anti tarnish paper do not fold sharply
+PKG016,HB016,Jewelry Box,Foam Insert,TRUE,FALSE,Place ring on foam slot verify quartz dome is fully exposed upward
+PKG017,HB017,Cotton Pouch,Silica Gel,FALSE,FALSE,Insert cuff bracelet flat into pouch with silica gel to prevent tarnish
+PKG018,HB018,Cotton Pouch,Anti Tarnish Paper,FALSE,FALSE,Wrap anklet in anti tarnish paper fold pouch closed and seal securely
+PKG019,HB019,Jewelry Box,Foam Insert,TRUE,TRUE,Secure brooch flat on foam insert moonstone center facing upward always
+PKG020,HB020,Linen Box,Foam Insert,TRUE,TRUE,Place each set piece in dedicated foam slot verify all items before sealing
