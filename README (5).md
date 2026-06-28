@@ -404,7 +404,7 @@ Jika **tidak ada** API key AI yang dikonfigurasi, **atau** semua percobaan ke AI
 ### 1. Clone Repository
 ```bash
 git clone <repo-url>
-cd HeatherBenjaminJewelry
+cd MatchaTim_HeatherBenjaminJewelry
 ```
 
 ### 2. Setup Backend
