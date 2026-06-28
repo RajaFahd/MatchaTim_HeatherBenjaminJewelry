@@ -404,7 +404,7 @@ If **no** AI API key is configured, **or** all AI attempts fail, the system **wi
 ### 1. Clone the Repository
 ```bash
 git clone <repo-url>
-cd HeatherBenjaminJewelry
+cd MatchaTim_HeatherBenjaminJewelry
 ```
 
 ### 2. Set Up the Backend
